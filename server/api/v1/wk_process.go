@@ -106,7 +106,7 @@ func FindWorkflowProcess(c *gin.Context) {
 }
 
 // @Tags WorkflowProcess
-// @Summary 用id查询工作流步骤
+// @Summary 用id查询审批流步骤
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
@@ -149,7 +149,7 @@ func GetWorkflowProcessList(c *gin.Context) {
 }
 
 // @Tags WorkflowProcess
-// @Summary 开启工作流
+// @Summary 开启审批流
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
@@ -168,7 +168,7 @@ func StartWorkflow(c *gin.Context) {
 }
 
 // @Tags WorkflowProcess
-// @Summary 提交工作流
+// @Summary 提交审批流
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
@@ -187,7 +187,7 @@ func CompleteWorkflowMove(c *gin.Context) {
 }
 
 // @Tags WorkflowProcess
-// @Summary 我发起的工作流
+// @Summary 我发起的审批流
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json

@@ -15,7 +15,7 @@ type ExaWfLeave struct {
 }
 
 type ExaWfLeaveWorkflow struct {
-	// 工作流操作结构体
+	// 审批流操作结构体
 	WorkflowBase `json:"wf"`
 	ExaWfLeave   `json:"business"`
 }

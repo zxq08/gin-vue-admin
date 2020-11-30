@@ -56,7 +56,7 @@ func InitWkProcess(db *gorm.DB) {
 
 		return nil
 	}); err != nil {
-		color.Warn.Printf("[Mysql]-->工作流相关 表的初始数据失败,err: %v\n", err)
+		color.Warn.Printf("[Mysql]-->审批流相关 表的初始数据失败,err: %v\n", err)
 		os.Exit(0)
 	}
 }

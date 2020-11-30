@@ -18,7 +18,7 @@ func getTable(businessType string) interface{} {
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: CreateWorkflowProcess
-//@description: 创建工作流相关信息
+//@description: 创建审批流相关信息
 //@param: workflowProcess model.WorkflowProcess
 //@return: err error
 
@@ -29,7 +29,7 @@ func CreateWorkflowProcess(workflowProcess model.WorkflowProcess) (err error) {
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: DeleteWorkflowProcess
-//@description: 删除工作流相关信息
+//@description: 删除审批流相关信息
 //@param: workflowProcess model.WorkflowProcess
 //@return: err error
 
@@ -62,7 +62,7 @@ func DeleteWorkflowProcess(workflowProcess model.WorkflowProcess) (err error) {
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: CreateWorkflowProcess
-//@description: 批量删除工作流信息（暂未启用）
+//@description: 批量删除审批流信息（暂未启用）
 //@param: ids request.IdsReq
 //@return: err error
 
@@ -73,7 +73,7 @@ func DeleteWorkflowProcessByIds(ids request.IdsReq) (err error) {
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: UpdateWorkflowProcess
-//@description: 更新工作流相关信息
+//@description: 更新审批流相关信息
 //@param: workflowProcess *model.WorkflowProcess
 //@return: err error
 
@@ -119,7 +119,7 @@ func UpdateWorkflowProcess(workflowProcess *model.WorkflowProcess) (err error) {
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetWorkflowProcess
-//@description: 获取工作流相关信息
+//@description: 获取审批流相关信息
 //@param: id string
 //@return: err error,workflowProcess model.WorkflowProcess
 
@@ -130,7 +130,7 @@ func GetWorkflowProcess(id string) (err error, workflowProcess model.WorkflowPro
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetWorkflowCreateStep
-//@description: 获取工作流步骤信息
+//@description: 获取审批流步骤信息
 //@param: id string
 //@return: err error, workflowNodes []model.WorkflowNode
 
@@ -141,7 +141,7 @@ func FindWorkflowStep(id string) (err error, workflowNode model.WorkflowProcess)
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetWorkflowProcessInfoList
-//@description: 获取工作流列表
+//@description: 获取审批流列表
 //@param: info request.WorkflowProcessSearch
 //@return: err error, list interface{}, total int64
 
@@ -165,7 +165,7 @@ func GetWorkflowProcessInfoList(info request.WorkflowProcessSearch) (err error, 
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: StartWorkflow
-//@description: 开启一个工作流
+//@description: 开启一个审批流
 //@param: wfInterface model.GVA_Workflow
 //@return: err error
 
