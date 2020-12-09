@@ -4,7 +4,7 @@
       <el-col :span="6">
         <div class="fl-left avatar-box">
           <div class="user-card">
-              <div class="user-headpic-update" :style="{ 'background-image': 'url(' + userInfo.headerImg + ')','background-repeat':'no-repeat','background-size':'cover' }" >
+             <div class="user-headpic-update" :style="{ 'background-image': 'url(' + userInfo.headerImg + ')','background-repeat':'no-repeat','background-size':'cover' }" >
               <span class="update" @click="openChooseImg">
                 <i class="el-icon-edit"></i>
                 重新上传</span>
@@ -16,7 +16,7 @@
             <div class="user-information">
               <ul>
                 <li>
-                   <i class="el-icon-user"></i>{{userInfo.nickName}}
+                  <i class="el-icon-user"></i>{{userInfo.nickName}}
                 </li>
                 <li>
                   <i class="el-icon-data-analysis"></i>北京反转极光科技有限公司-技术部-前端事业群
@@ -74,7 +74,7 @@
 
     <ChooseImg ref="chooseImg" @enter-img="enterImg" />
 
-    <el-dialog :visible.sync="showPassword" @close="clearPassword" title="修改密码" width="360px">
+    <el-dialog v-model="showPassword" @close="clearPassword" title="修改密码" width="360px">
       <el-form :model="pwdModify" :rules="rules" label-width="80px" ref="modifyPwdForm">
         <el-form-item :minlength="6" label="原密码" prop="password">
           <el-input show-password v-model="pwdModify.password"></el-input>
@@ -86,10 +86,12 @@
           <el-input show-password v-model="pwdModify.confirmPassword"></el-input>
         </el-form-item>
       </el-form>
-      <div class="dialog-footer" slot="footer">
+      <template #footer>
+      <div class="dialog-footer">
         <el-button @click="showPassword=false">取 消</el-button>
         <el-button @click="savePassword" type="primary">确 定</el-button>
       </div>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -277,6 +279,7 @@ export default {
     }
   }
 }
+
 .user-headpic-update{
     width: 120px;
     height: 120px;

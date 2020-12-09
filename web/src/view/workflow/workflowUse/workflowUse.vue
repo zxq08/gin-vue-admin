@@ -3,12 +3,16 @@
       <div style="padding:10px 20px">
     <el-steps :active="moves.length-1" :process-status="processStatus" finish-status="finish" align-center>
       <el-step v-for="(item, key) in moves" :key="key">
-        <div slot="title">{{ item.workflowNode.label }}</div>
-        <div slot="description">
+          <template #title>
+               <div>{{ item.workflowNode.label }}</div>
+          </template>
+          <template #description>
+        <div>
           <div>节点说明:{{ item.workflowNode.description }}</div>
           <div v-if="item.operator.nickName">操作人:{{ item.operator.nickName }}</div>
           <div>操作参数:{{ item.param||'无参数' }}</div>
         </div>
+          </template>
       </el-step>
     </el-steps>
       </div>

@@ -100,7 +100,7 @@ export const getWorkflowProcessList = (params) => {
 }
 
 // @Tags WorkflowProcess
-// @Summary 用id查询工作流步骤
+// @Summary 用id查询审批流步骤
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
@@ -149,7 +149,7 @@ export const completeWorkflowMove = (data, params = { businessType: data.wf.busi
         })
     }
     // @Tags WorkflowProcess
-    // @Summary 我发起的工作流
+    // @Summary 我发起的审批流
     // @Security ApiKeyAuth
     // @accept application/json
     // @Produce application/json
@@ -165,7 +165,7 @@ export const getMyStated = () => {
 
 
 // @Tags WorkflowProcess
-// @Summary 我发起的工作流
+// @Summary 我发起的审批流
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json

@@ -1,7 +1,7 @@
 <template>
   <el-container class="layout-cont">
     <el-container :class="[isSider?'openside':'hideside',isMobile ? 'mobile': '']">
-      <el-row :class="[isShadowBg?'shadowBg':'']" @click.native="changeShadow()"></el-row>
+      <el-row :class="[isShadowBg?'shadowBg':'']" @click="changeShadow()"></el-row>
       <el-aside class="main-cont main-left">
         <div class="tilte">
           <img alt class="logoimg" src="~@/assets/nav_logo.png" />
@@ -43,16 +43,18 @@
                     <span style="margin-left: 5px">{{userInfo.nickName}}</span>
                     <i class="el-icon-arrow-down"></i>
                   </span>
-                  <el-dropdown-menu class="dropdown-group" slot="dropdown">
+                  <template #dropdown>
+                  <el-dropdown-menu class="dropdown-group">
                     <el-dropdown-item>
                       <span>
                         更多信息
                         <el-badge is-dot />
                       </span>
                     </el-dropdown-item>
-                    <el-dropdown-item @click.native="toPerson" icon="el-icon-s-custom">个人信息</el-dropdown-item>
-                    <el-dropdown-item @click.native="LoginOut" icon="el-icon-table-lamp">登 出</el-dropdown-item>
+                    <el-dropdown-item @click="toPerson" icon="el-icon-s-custom">个人信息</el-dropdown-item>
+                    <el-dropdown-item @click="LoginOut" icon="el-icon-table-lamp">登 出</el-dropdown-item>
                   </el-dropdown-menu>
+                  </template>
                 </el-dropdown>
               </div>
                </el-col>
@@ -65,14 +67,19 @@
             <HistoryComponent />
           </div>
         </transition>
+
+        <router-view v-slot="{ Component }" v-loading="loadingFlag"  element-loading-text="正在加载中" class="admin-box" v-if="$route.meta.keepAlive">
         <transition mode="out-in" name="el-fade-in-linear">
           <keep-alive>
-            <router-view  v-loading="loadingFlag"  element-loading-text="正在加载中" class="admin-box" v-if="$route.meta.keepAlive"></router-view>
+            <component :is="Component" />
           </keep-alive>
         </transition>
-        <transition mode="out-in" name="el-fade-in-linear">
-          <router-view  v-loading="loadingFlag"  element-loading-text="正在加载中" class="admin-box" v-if="!$route.meta.keepAlive"></router-view>
-        </transition>
+        </router-view>
+        <router-view v-slot="{ Component }" v-loading="loadingFlag"  element-loading-text="正在加载中" class="admin-box" v-if="!$route.meta.keepAlive">
+          <transition mode="out-in" name="el-fade-in-linear">
+            <component :is="Component" />
+          </transition>
+        </router-view>
        <BottomInfo />
       </el-main>
     </el-container>
@@ -88,6 +95,8 @@ import Search from '@/view/layout/search/search'
 import BottomInfo from '@/view/layout/bottomInfo/bottomInfo'
 import { mapGetters, mapActions } from 'vuex'
 import CustomPic from '@/components/customPic'
+import { emitter } from '@/utils/mitt'
+
 export default {
   name: 'Layout',
   data() {
@@ -116,7 +125,7 @@ export default {
       this.isCollapse = !this.isCollapse
       this.isSider = !this.isCollapse
       this.isShadowBg = !this.isCollapse
-      this.$bus.emit('collapse', this.isCollapse)
+      emitter.emit('collapse', this.isCollapse)
     },
     toPerson() {
       this.$router.push({ name: 'person' })
@@ -151,12 +160,12 @@ export default {
       this.isSider = true
       this.isCollapse = false
     }
-    this.$bus.emit('collapse', this.isCollapse)
-    this.$bus.emit('mobile', this.isMobile)
-    this.$bus.on("showLoading",()=>{
+    emitter.emit('collapse', this.isCollapse)
+    emitter.emit('mobile', this.isMobile)
+    emitter.on("showLoading",()=>{
       this.loadingFlag = true
     })
-    this.$bus.on("closeLoading",()=>{
+    emitter.on("closeLoading",()=>{
       this.loadingFlag = false
     })
     window.onresize = () => {
@@ -175,8 +184,8 @@ export default {
           this.isSider = true
           this.isCollapse = false
         }
-        this.$bus.emit('collapse', this.isCollapse)
-        this.$bus.emit('mobile', this.isMobile)
+        emitter.emit('collapse', this.isCollapse)
+        emitter.emit('mobile', this.isMobile)
       })()
     }
   }

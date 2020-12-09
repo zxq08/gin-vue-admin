@@ -4,7 +4,7 @@
       <transition :duration="{ enter: 800, leave: 100 }" mode="out-in" name="el-fade-in-linear">
         <el-menu
           :collapse="isCollapse"
-          :collapse-transition="true"
+          :collapse-transition="false"
           :default-active="active"
           @select="selectMenuItem"
           active-text-color="#fff"
@@ -24,6 +24,7 @@
 <script>
 import { mapGetters, mapMutations } from "vuex";
 import AsideComponent from "@/view/layout/aside/asideComponent";
+import { emitter } from '@/utils/mitt'
 export default {
   name: "Aside",
   data() {
@@ -49,6 +50,7 @@ export default {
       if (index.indexOf("http://") > -1 || index.indexOf("https://") > -1) {
         window.open(index);
       } else {
+        this.active = index
         this.$router.push({ name: index, query, params });
       }
     }
@@ -66,7 +68,7 @@ export default {
       this.isCollapse = !this.isCollapse;
     }
 
-    this.$bus.on("collapse", item => {
+    emitter.on("collapse", item => {
       this.isCollapse = item;
     });
   },
@@ -75,8 +77,8 @@ export default {
       this.active = this.$route.name;
     }
   },
-  beforeDestroy() {
-    this.$bus.off("collapse");
+  beforeUnmount() {
+    emitter.off("collapse");
   }
 };
 </script>

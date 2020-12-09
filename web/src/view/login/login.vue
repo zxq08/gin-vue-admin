@@ -17,17 +17,14 @@
           :model="loginForm"
           :rules="rules"
           ref="loginForm"
-          @keyup.enter.native="submitForm"
+          @keyup.enter="submitForm"
         >
           <el-form-item prop="username">
-            <el-input
-              placeholder="请输入用户名"
-              v-model="loginForm.username"
-            >
-            <i
-                class="el-input__icon el-icon-user"
-                slot="suffix"
-              ></i></el-input>
+            <el-input placeholder="请输入用户名" v-model="loginForm.username">
+              <template #suffix>
+                <i class="el-input__icon el-icon-user"></i>
+              </template>
+            </el-input>
           </el-form-item>
           <el-form-item prop="password">
             <el-input
@@ -35,33 +32,29 @@
               placeholder="请输入密码"
               v-model="loginForm.password"
             >
-              <i
-                :class="'el-input__icon el-icon-' + lock"
-                @click="changeLock"
-                slot="suffix"
-              ></i>
+               <template #suffix>
+                <i :class="'el-input__icon el-icon-' + lock" @click="changeLock"></i>
+              </template>
             </el-input>
           </el-form-item>
-          <el-form-item style="position:relative">
+          <el-form-item style="position: relative">
             <el-input
               v-model="loginForm.captcha"
               name="logVerify"
               placeholder="请输入验证码"
-              style="width:60%"
+              style="width: 60%"
             />
             <div class="vPic">
               <img
                 v-if="picPath"
                 :src="picPath"
-                width="100%"
-                height="100%"
                 alt="请输入验证码"
                 @click="loginVefify()"
               />
             </div>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="submitForm" style="width:100%"
+            <el-button type="primary" @click="submitForm" style="width: 100%"
               >登 录</el-button
             >
           </el-form-item>
@@ -168,5 +161,4 @@ export default {
 
 <style scoped lang="scss">
 @import '@/style/login.scss';
-
 </style>

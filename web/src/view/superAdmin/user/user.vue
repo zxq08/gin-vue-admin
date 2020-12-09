@@ -5,7 +5,7 @@
     </div>
     <el-table :data="tableData" border stripe>
       <el-table-column label="头像" min-width="50">
-        <template slot-scope="scope">
+        <template #default="scope">
           <div :style="{'textAlign':'center'}">
             <CustomPic :picSrc="scope.row.headerImg" />
           </div>
@@ -15,7 +15,7 @@
       <el-table-column label="用户名" min-width="150" prop="userName"></el-table-column>
       <el-table-column label="昵称" min-width="150" prop="nickName"></el-table-column>
       <el-table-column label="用户角色" min-width="150">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-cascader
             @change="changeAuthority(scope.row)"
             v-model="scope.row.authority.authorityId"
@@ -27,14 +27,17 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" min-width="150">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-popover placement="top" width="160" v-model="scope.row.visible">
             <p>确定要删除此用户吗</p>
             <div style="text-align: right; margin: 0">
               <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
               <el-button type="primary" size="mini" @click="deleteUser(scope.row)">确定</el-button>
             </div>
-            <el-button type="danger" icon="el-icon-delete" size="small" slot="reference">删除</el-button>
+            <template #reference>
+
+            <el-button type="danger" icon="el-icon-delete" size="small">删除</el-button>
+            </template>
           </el-popover>
         </template>
       </el-table-column>
@@ -50,7 +53,7 @@
       layout="total, sizes, prev, pager, next, jumper"
     ></el-pagination>
 
-    <el-dialog :visible.sync="addUserDialog" custom-class="user-dialog" title="新增用户">
+    <el-dialog v-model="addUserDialog" custom-class="user-dialog" title="新增用户">
       <el-form :rules="rules" ref="userForm" :model="userInfo">
         <el-form-item label="用户名" label-width="80px" prop="username">
           <el-input v-model="userInfo.username"></el-input>
@@ -78,10 +81,12 @@
           ></el-cascader>
         </el-form-item>
       </el-form>
-      <div class="dialog-footer" slot="footer">
+      <template #footer>
+      <div class="dialog-footer">
         <el-button @click="closeAddUserDialog">取 消</el-button>
         <el-button @click="enterAddUserDialog" type="primary">确 定</el-button>
       </div>
+      </template>
     </el-dialog>
     <ChooseImg ref="chooseImg" :target="userInfo" :targetKey="`headerImg`"/>
   </div>
