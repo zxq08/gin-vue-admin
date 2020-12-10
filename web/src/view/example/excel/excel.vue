@@ -13,7 +13,9 @@
       multiple
     >
       <el-button size="small" type="primary">点击上传</el-button>
-      <div class="el-upload__tip" slot="tip">未对文件格式及大小做校验</div>
+      <template #tip>
+        <div class="el-upload__tip">未对文件格式及大小做校验</div>
+      </template>
     </el-upload>
   </div>
 </template>

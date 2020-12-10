@@ -12,9 +12,11 @@
             :show-file-list="false"
           >
             <el-button size="small" type="primary">点击上传</el-button>
-            <div class="el-upload__tip" slot="tip">
-              只能上传jpg/png文件，且不超过500kb
-            </div>
+            <template #tip>
+              <div class="el-upload__tip">
+                只能上传jpg/png文件，且不超过500kb
+              </div>
+            </template>
           </el-upload>
         </el-col>
         <el-col :span="12">
@@ -26,13 +28,13 @@
 
       <el-table :data="tableData" border stripe>
         <el-table-column label="预览" width="100">
-          <template slot-scope="scope">
+          <template #default="scope">
             <CustomPic picType="file" :picSrc="scope.row.url" />
           </template>
         </el-table-column>
         <el-table-column label="日期" prop="UpdatedAt" width="180">
-          <template slot-scope="scope">
-            <div>{{ scope.row.UpdatedAt | formatDate }}</div>
+          <template #default="scope">
+            <div>{{ formatDate(scope.row.UpdatedAt) }}</div>
           </template>
         </el-table-column>
         <el-table-column
@@ -46,7 +48,7 @@
           min-width="300"
         ></el-table-column>
         <el-table-column label="标签" prop="tag" width="100">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-tag
               :type="scope.row.tag === 'jpg' ? 'primary' : 'success'"
               disable-transitions
@@ -55,7 +57,7 @@
           </template>
         </el-table-column>
         <el-table-column label="操作" width="160">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-button @click="downloadFile(scope.row)" size="small" type="text"
               >下载</el-button
             >
@@ -107,7 +109,8 @@ export default {
   computed: {
     ...mapGetters("user", ["userInfo", "token"]),
   },
-  filters: {
+ 
+  methods: {
     formatDate: function (time) {
       if (time != null && time != "") {
         var date = new Date(time);
@@ -116,8 +119,6 @@ export default {
         return "";
       }
     },
-  },
-  methods: {
     async deleteFile(row) {
       this.$confirm("此操作将永久文件, 是否继续?", "提示", {
         confirmButtonText: "确定",

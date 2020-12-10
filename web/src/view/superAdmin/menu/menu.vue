@@ -10,7 +10,7 @@
       <el-table-column label="路由Name" min-width="160" prop="name"></el-table-column>
       <el-table-column label="路由Path" min-width="160" prop="path"></el-table-column>
       <el-table-column label="是否隐藏" min-width="100" prop="hidden">
-        <template slot-scope="scope">
+        <template #default="scope">
           <span>{{scope.row.hidden?"隐藏":"显示"}}</span>
         </template>
       </el-table-column>
@@ -18,18 +18,18 @@
       <el-table-column label="排序" min-width="70" prop="sort"></el-table-column>
       <el-table-column label="文件路径" min-width="360" prop="component"></el-table-column>
       <el-table-column label="展示名称" min-width="120" prop="authorityName">
-        <template slot-scope="scope">
+        <template #default="scope">
           <span>{{scope.row.meta.title}}</span>
         </template>
       </el-table-column>
       <el-table-column label="图标" min-width="140" prop="authorityName">
-        <template slot-scope="scope">
-          <i :class="`el-icon-${scope.row.meta.icon}`"></i>
+        <template #default="scope">
+          <i :class="`el-icon-${scope.row.meta}`"></i>
           <span>{{scope.row.meta.icon}}</span>
         </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="300">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-button
             @click="addMenu(scope.row.ID)"
             size="small"
@@ -52,7 +52,7 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog :before-close="handleClose" :title="dialogTitle" :visible.sync="dialogFormVisible">
+    <el-dialog :before-close="handleClose" :title="dialogTitle" v-model="dialogFormVisible">
       <el-form
         :inline="true"
         :model="form"
@@ -70,10 +70,12 @@
           ></el-input>
         </el-form-item>
         <el-form-item prop="path" style="width:30%">
-          <div style="display:inline-block" slot="label">
+          <template #label>
+          <div style="display:inline-block">
             路由path
             <el-checkbox style="float:right;margin-left:20px;" v-model="checkFlag">添加参数</el-checkbox>
           </div>
+          </template>
           <el-input
             :disabled="!checkFlag"
             autocomplete="off"
@@ -89,7 +91,7 @@
         </el-form-item>
         <el-form-item label="父节点Id" style="width:30%">
           <el-cascader
-            :disabled="!this.isEdit"
+            :disabled="isEdit"
             :options="menuOption"
             :props="{ checkStrictly: true,label:'title',value:'ID',disabled:'disabled',emitPath:false}"
             :show-all-levels="false"
@@ -105,7 +107,7 @@
         </el-form-item>
         <el-form-item label="图标" prop="meta.icon" style="width:30%">
           <icon :meta="form.meta">
-            <template slot="prepend">el-icon-</template>
+            <template #prepend>el-icon-</template>
           </icon>
         </el-form-item>
         <el-form-item label="排序标记" prop="sort" style="width:30%">
@@ -128,7 +130,7 @@
         >新增菜单参数</el-button>
         <el-table :data="form.parameters" stripe style="width: 100%">
           <el-table-column prop="type" label="参数类型" width="180">
-            <template slot-scope="scope">
+            <template #default="scope">
               <el-select v-model="scope.row.type" placeholder="请选择">
                 <el-option key="query" value="query" label="query"></el-option>
                 <el-option key="params" value="params" label="params"></el-option>
@@ -136,21 +138,21 @@
             </template>
           </el-table-column>
           <el-table-column prop="key" label="参数key" width="180">
-            <template slot-scope="scope">
+            <template #default="scope">
               <div>
                 <el-input v-model="scope.row.key"></el-input>
               </div>
             </template>
           </el-table-column>
           <el-table-column prop="value" label="参数值">
-            <template slot-scope="scope">
+            <template #default="scope">
               <div>
                 <el-input v-model="scope.row.value"></el-input>
               </div>
             </template>
           </el-table-column>
           <el-table-column>
-            <template slot-scope="scope">
+            <template #default="scope">
               <div>
                 <el-button
                   type="danger"
@@ -163,10 +165,12 @@
           </el-table-column>
         </el-table>
       </div>
-      <div class="dialog-footer" slot="footer">
+      <template #footer>
+      <div class="dialog-footer">
         <el-button @click="closeDialog">取 消</el-button>
         <el-button @click="enterDialog" type="primary">确 定</el-button>
       </div>
+      </template>
     </el-dialog>
   </div>
 </template>

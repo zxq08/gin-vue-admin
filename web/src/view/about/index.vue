@@ -3,7 +3,9 @@
     <el-row :gutter="10">
       <el-col :span="12">
         <el-card>
-          <div slot="header">gin-vue-admin</div>
+          <template #header>
+            <div>gin-vue-admin</div>
+          </template>
           <div>
             <el-row>
               <el-col :span="8" :offset="8">
@@ -44,7 +46,9 @@
           </div>
         </el-card>
         <el-card style="margin-top: 20px">
-          <div slot="header">flipped-aurora团队</div>
+          <template #header>
+            <div>flipped-aurora团队</div>
+          </template>
           <div>
             <el-row>
               <el-col :span="8" :offset="8">
@@ -58,23 +62,24 @@
               </el-col>
             </el-row>
             <el-row style="margin-left: 40px" :gutter="20">
-              <template v-for="(item, index) in members">
-                <el-col :span="8" :key="index">
+                <el-col :span="8" :key="index" v-for="(item, index) in members">
                   <a :href="item.html_url">
                     <img class="avatar-img" :src="item.avatar_url" />
                     <a class="author-name" style="">{{ item.login }}</a>
                   </a>
                 </el-col>
-              </template>
             </el-row>
           </div>
         </el-card>
       </el-col>
       <el-col :span="12">
         <el-card>
-          <div slot="header">
+          <template #header>
+            <div>
             提交记录
           </div>
+          </template>
+          
           <div>
             <Timeline
               :timeline-items="dataTimeline"
@@ -84,7 +89,8 @@
               :show-day-and-month="true"
               order="desc"
               dateLocale="zh-CN"
-            />
+            >
+            </Timeline>
           </div>
           <el-button class="load-more" @click="loadMore" type="text"
             >Load more</el-button
@@ -170,8 +176,8 @@ export default {
   margin-left: 10px;
   color: darkblue;
   line-height: 100px;
-  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande',
+    'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
 .dom-center {

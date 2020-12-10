@@ -24,8 +24,8 @@
         width="120"
       ></el-table-column>
       <el-table-column label="节点日期" width="180">
-        <template slot-scope="scope">{{
-          scope.row.CreatedAt | formatDate
+        <template #default="scope">{{
+          formatDate(scope.row.CreatedAt)
         }}</template>
       </el-table-column>
       <el-table-column
@@ -43,7 +43,7 @@
          label="流程状态"
         width="120"
         >
-            <template slot-scope="scope">
+            <template #default="scope">
                 <div>
                     {{scope.row.isActive?"进行中":"已结束"}}
                 </div>
@@ -55,7 +55,7 @@
         min-width="200"
       ></el-table-column>
       <el-table-column label="按钮组">
-        <template slot-scope="scope">
+        <template #default="scope">
             <el-button @click="view(scope.row)">查看</el-button>
         </template>
       </el-table-column>
@@ -73,6 +73,14 @@ export default {
         }
     },
     methods:{
+      formatDate: function(time) {
+            if (time != null && time != '') {
+                var date = new Date(time)
+                return formatTimeToStr(date, 'yyyy-MM-dd hh:mm:ss')
+            } else {
+                return ''
+            }
+        },
         view(row){
             this.$router.push({
                     name: "workflowUse",
@@ -86,16 +94,6 @@ export default {
         const res = await getMyStated()
         if(res.code == 0){
             this.tableData = res.data.wfms
-        }
-    },
-    filters:{   
-        formatDate: function(time) {
-            if (time != null && time != '') {
-                var date = new Date(time)
-                return formatTimeToStr(date, 'yyyy-MM-dd hh:mm:ss')
-            } else {
-                return ''
-            }
         }
     }
 }

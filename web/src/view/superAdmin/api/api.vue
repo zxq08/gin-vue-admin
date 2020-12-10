@@ -35,22 +35,21 @@
       <el-table-column label="api分组" min-width="150" prop="apiGroup" sortable="custom"></el-table-column>
       <el-table-column label="api简介" min-width="150" prop="description" sortable="custom"></el-table-column>
       <el-table-column label="请求" min-width="150" prop="method" sortable="custom">
-        <template slot-scope="scope">
+        <template #default="scope">
           <div>
             {{scope.row.method}}
             <el-tag
               :key="scope.row.methodFiletr"
-              :type="scope.row.method|tagTypeFiletr"
+              :type="tagTypeFiletr(scope.row.method)"
               effect="dark"
               size="mini"
-            >{{scope.row.method|methodFiletr}}</el-tag>
-            <!-- {{scope.row.method|methodFiletr}} -->
+            >{{methodFiletr(scope.row.method)}}</el-tag>
           </div>
         </template>
       </el-table-column>
 
       <el-table-column fixed="right" label="操作" width="200">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-button @click="editApi(scope.row)" size="small" type="primary" icon="el-icon-edit">编辑</el-button>
           <el-button @click="deleteApi(scope.row)" size="small" type="danger" icon="el-icon-delete">删除</el-button>
         </template>
@@ -67,7 +66,7 @@
       layout="total, sizes, prev, pager, next, jumper"
     ></el-pagination>
 
-    <el-dialog :before-close="closeDialog" :title="dialogTitle" :visible.sync="dialogFormVisible">
+    <el-dialog :before-close="closeDialog" :title="dialogTitle" v-model="dialogFormVisible">
       <el-form :inline="true" :model="form" :rules="rules" label-width="80px" ref="apiForm">
         <el-form-item label="路径" prop="path">
           <el-input autocomplete="off" v-model="form.path"></el-input>
@@ -90,10 +89,12 @@
         </el-form-item>
       </el-form>
       <div class="warning">新增Api需要在角色管理内配置权限才可使用</div>
-      <div class="dialog-footer" slot="footer">
-        <el-button @click="closeDialog">取 消</el-button>
-        <el-button @click="enterDialog" type="primary">确 定</el-button>
-      </div>
+      <template #footer>
+         <div class="dialog-footer">
+            <el-button @click="closeDialog">取 消</el-button>
+            <el-button @click="enterDialog" type="primary">确 定</el-button>
+          </div>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -165,6 +166,15 @@ export default {
     }
   },
   methods: {
+     methodFiletr(value) {
+      const target = methodOptions.filter(item => item.value === value)[0]
+      // return target && `${target.label}(${target.value})`
+      return target && `${target.label}`
+    },
+    tagTypeFiletr(value) {
+      const target = methodOptions.filter(item => item.value === value)[0]
+      return target && `${target.type}`
+    },
     // 排序
     sortChange({ prop, order }) {
       if (prop) {
@@ -279,17 +289,6 @@ export default {
           }
         }
       })
-    }
-  },
-  filters: {
-    methodFiletr(value) {
-      const target = methodOptions.filter(item => item.value === value)[0]
-      // return target && `${target.label}(${target.value})`
-      return target && `${target.label}`
-    },
-    tagTypeFiletr(value) {
-      const target = methodOptions.filter(item => item.value === value)[0]
-      return target && `${target.type}`
     }
   },
   created(){

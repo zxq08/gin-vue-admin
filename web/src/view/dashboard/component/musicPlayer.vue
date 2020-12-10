@@ -1,17 +1,18 @@
 <template>
     <div>
         <div style="width: 100%">
-            <APlayer :audio="audio"></APlayer>
+            V3音乐播放器失效
+            <!-- <APlayer :audio="audio"></APlayer> -->
         </div>
     </div>
 </template>
 
 <script>
-    import { APlayer } from '@moefe/vue-aplayer';
+    // import { APlayer } from '@moefe/vue-aplayer';
     export default {
         name: "musicPlayer",
         components:{
-            APlayer
+            // APlayer
         },
         data(){
             return {

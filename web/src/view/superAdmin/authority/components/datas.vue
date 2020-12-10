@@ -31,7 +31,7 @@ export default {
     },
     authority: {
       default: function() {
-        return {}
+        return []
       },
       type: Array
     }

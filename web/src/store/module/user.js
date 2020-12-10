@@ -40,7 +40,7 @@ export const user = {
             if (res.code == 0) {
                 commit('setUserInfo', res.data.user)
                 commit('setToken', res.data.token)
-                const redirect = router.history.current.query.redirect
+                const redirect = router.currentRoute._value.query.redirect
                 if (redirect) {
                     router.push({ path: redirect })
                 } else {

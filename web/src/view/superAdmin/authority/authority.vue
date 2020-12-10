@@ -14,7 +14,7 @@
       <el-table-column label="角色id" min-width="180" prop="authorityId"></el-table-column>
       <el-table-column label="角色名称" min-width="180" prop="authorityName"></el-table-column>
       <el-table-column fixed="right" label="操作" width="460">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-button @click="opdendrawer(scope.row)" size="small" type="primary">设置权限</el-button>
           <el-button
             @click="addAuthority(scope.row.authorityId)"
@@ -44,7 +44,7 @@
       </el-table-column>
     </el-table>
     <!-- 新增角色弹窗 -->
-    <el-dialog :title="dialogTitle" :visible.sync="dialogFormVisible">
+    <el-dialog :title="dialogTitle" v-model="dialogFormVisible">
       <el-form :model="form" :rules="rules" ref="authorityForm">
         <el-form-item label="父级角色" prop="parentId">
           <el-cascader
@@ -63,13 +63,15 @@
           <el-input autocomplete="off" v-model="form.authorityName"></el-input>
         </el-form-item>
       </el-form>
-      <div class="dialog-footer" slot="footer">
+      <template #footer>
+      <div class="dialog-footer">
         <el-button @click="closeDialog">取 消</el-button>
         <el-button @click="enterDialog" type="primary">确 定</el-button>
       </div>
+      </template>
     </el-dialog>
 
-    <el-drawer :visible.sync="drawer" :with-header="false" size="40%" title="角色配置" v-if="drawer">
+    <el-drawer v-model="drawer" :with-header="false" size="40%" title="角色配置" v-if="drawer">
       <el-tabs :before-leave="autoEnter" class="role-box" type="border-card">
         <el-tab-pane label="角色菜单">
           <Menus :row="activeRow" ref="menus" />

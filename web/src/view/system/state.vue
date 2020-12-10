@@ -3,7 +3,9 @@
     <el-row :gutter="15" class="system_state">
       <el-col :span="12">
         <el-card v-if="state.os" class="card_item">
-          <div slot="header">Runtime</div>
+          <template #header>
+          <div>Runtime</div>
+          </template>
           <div>
             <el-row :gutter="10">
               <el-col :span="12">os:</el-col>
@@ -30,7 +32,9 @@
       </el-col>
       <el-col :span="12">
         <el-card v-if="state.disk" class="card_item">
-          <div slot="header">Disk</div>
+          <template #header>
+          <div>Disk</div>
+          </template>
           <div>
             <el-row :gutter="10">
               <el-col :span="12">
@@ -68,16 +72,17 @@
         <el-card
           class="card_item"
           v-if="state.cpu"
-          :body-style="{ height: '180px', 'overflow-y': 'scroll' }"
+          :body-style="{ height: '180px', overflowY: 'scroll' }"
         >
-          <div slot="header">CPU</div>
+          <template #header>
+          <div>CPU</div>
+          </template>
           <div>
             <el-row :gutter="10">
               <el-col :span="12">physical number of cores:</el-col>
               <el-col :span="12" v-text="state.cpu.cores"> </el-col>
             </el-row>
-            <template v-for="(item, index) in state.cpu.cpus">
-              <el-row :key="index" :gutter="10">
+              <el-row v-for="(item, index) in state.cpu.cpus" :key="index" :gutter="10">
                 <el-col :span="12">core {{ index }}:</el-col>
                 <el-col :span="12"
                   ><el-progress
@@ -87,13 +92,14 @@
                   ></el-progress
                 ></el-col>
               </el-row>
-            </template>
           </div>
         </el-card>
       </el-col>
       <el-col :span="12">
         <el-card class="card_item" v-if="state.ram">
-          <div slot="header">Ram</div>
+          <template #header>
+          <div>Ram</div>
+          </template>
           <div>
             <el-row :gutter="10">
               <el-col :span="12">
@@ -153,7 +159,7 @@ export default {
       this.reload();
     }, 1000*10);
   },
-  beforeDestroy(){
+  beforeUnmount(){
     clearInterval(this.timer)
     this.timer = null
   },

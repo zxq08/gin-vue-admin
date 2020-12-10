@@ -32,7 +32,7 @@
     >
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column label="日期" width="180">
-        <template slot-scope="scope">{{scope.row.CreatedAt|formatDate}}</template>
+        <template #default="scope">{{formatDate(scope.row.CreatedAt)}}</template>
       </el-table-column>
 
       <el-table-column label="展示值" prop="label" width="120"></el-table-column>
@@ -40,13 +40,13 @@
       <el-table-column label="字典值" prop="value" width="120"></el-table-column>
 
       <el-table-column label="启用状态" prop="status" width="120">
-        <template slot-scope="scope">{{scope.row.status|formatBoolean}}</template>
+        <template #default="scope">{{formatBoolean(scope.row.status)}}</template>
       </el-table-column>
 
       <el-table-column label="排序标记" prop="sort" width="120"></el-table-column>
 
       <el-table-column label="按钮组">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-button @click="updateSysDictionaryDetail(scope.row)" size="small" type="primary">变更</el-button>
           <el-popover placement="top" width="160" v-model="scope.row.visible">
             <p>确定要删除吗？</p>
@@ -54,7 +54,10 @@
               <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
               <el-button type="primary" size="mini" @click="deleteSysDictionaryDetail(scope.row)">确定</el-button>
             </div>
-            <el-button type="danger" icon="el-icon-delete" size="mini" slot="reference">删除</el-button>
+            <template #reference>
+
+            <el-button type="danger" icon="el-icon-delete" size="mini" >删除</el-button>
+            </template>
           </el-popover>
         </template>
       </el-table-column>
@@ -71,7 +74,7 @@
       layout="total, sizes, prev, pager, next, jumper"
     ></el-pagination>
 
-    <el-dialog :before-close="closeDialog" :visible.sync="dialogFormVisible" title="弹窗操作">
+    <el-dialog :before-close="closeDialog" v-model="dialogFormVisible" title="弹窗操作">
       <el-form ref="elForm" :model="formData" :rules="rules" size="medium" label-width="110px">
         <el-form-item label="展示值" prop="label">
           <el-input
@@ -98,10 +101,12 @@
           <el-input-number v-model.number="formData.sort" placeholder="排序标记"></el-input-number>
         </el-form-item>
       </el-form>
-      <div class="dialog-footer" slot="footer">
+      <template #footer>
+      <div class="dialog-footer">
         <el-button @click="closeDialog">取 消</el-button>
         <el-button @click="enterDialog" type="primary">确 定</el-button>
       </div>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -157,7 +162,8 @@ export default {
       }
     };
   },
-  filters: {
+ 
+  methods: {
     formatDate: function(time) {
       if (time != null && time != "") {
         var date = new Date(time);
@@ -172,9 +178,7 @@ export default {
       } else {
         return "";
       }
-    }
-  },
-  methods: {
+    },
     //条件搜索前端看此方法
     onSubmit() {
       this.page = 1;

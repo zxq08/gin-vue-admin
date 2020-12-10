@@ -203,7 +203,7 @@
         return null;
       },
     },
-    destroyed(){
+    unmounted(){
       window.removeEventListener("resize", this.resizeFunc);
       this.graph.getNodes().forEach(node => {
         node.getKeyShape().stopAnimate();
