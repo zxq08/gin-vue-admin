@@ -29,29 +29,62 @@
         </el-form-item>
       </el-form>
     </div>
-    <el-table :data="tableData" @sort-change="sortChange" border stripe>
-      <el-table-column label="id" min-width="60" prop="ID" sortable="custom"></el-table-column>
-      <el-table-column label="api路径" min-width="150" prop="path" sortable="custom"></el-table-column>
-      <el-table-column label="api分组" min-width="150" prop="apiGroup" sortable="custom"></el-table-column>
-      <el-table-column label="api简介" min-width="150" prop="description" sortable="custom"></el-table-column>
+    <el-table :data="tableData.value" @sort-change="sortChange" border stripe>
+      <el-table-column
+        label="id"
+        min-width="60"
+        prop="ID"
+        sortable="custom"
+      ></el-table-column>
+      <el-table-column
+        label="api路径"
+        min-width="150"
+        prop="path"
+        sortable="custom"
+      ></el-table-column>
+      <el-table-column
+        label="api分组"
+        min-width="150"
+        prop="apiGroup"
+        sortable="custom"
+      ></el-table-column>
+      <el-table-column
+        label="api简介"
+        min-width="150"
+        prop="description"
+        sortable="custom"
+      ></el-table-column>
       <el-table-column label="请求" min-width="150" prop="method" sortable="custom">
         <template #default="scope">
           <div>
-            {{scope.row.method}}
+            {{ scope.row.method }}
             <el-tag
               :key="scope.row.methodFiletr"
               :type="tagTypeFiletr(scope.row.method)"
               effect="dark"
               size="mini"
-            >{{methodFiletr(scope.row.method)}}</el-tag>
+              >{{ methodFiletr(scope.row.method) }}</el-tag
+            >
           </div>
         </template>
       </el-table-column>
 
       <el-table-column fixed="right" label="操作" width="200">
         <template #default="scope">
-          <el-button @click="editApi(scope.row)" size="small" type="primary" icon="el-icon-edit">编辑</el-button>
-          <el-button @click="deleteApi(scope.row)" size="small" type="danger" icon="el-icon-delete">删除</el-button>
+          <el-button
+            @click="editApi(scope.row)"
+            size="small"
+            type="primary"
+            icon="el-icon-edit"
+            >编辑</el-button
+          >
+          <el-button
+            @click="deleteApiFun(scope.row)"
+            size="small"
+            type="danger"
+            icon="el-icon-delete"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -59,15 +92,25 @@
       :current-page="page"
       :page-size="pageSize"
       :page-sizes="[10, 30, 50, 100]"
-      :style="{float:'right',padding:'20px'}"
+      :style="{ float: 'right', padding: '20px' }"
       :total="total"
       @current-change="handleCurrentChange"
       @size-change="handleSizeChange"
       layout="total, sizes, prev, pager, next, jumper"
     ></el-pagination>
 
-    <el-dialog :before-close="closeDialog" :title="dialogTitle" v-model="dialogFormVisible">
-      <el-form :inline="true" :model="form" :rules="rules" label-width="80px" ref="apiForm">
+    <el-dialog
+      :before-close="closeDialog"
+      :title="dialogTitle"
+      v-model="dialogFormVisible"
+    >
+      <el-form
+        :inline="true"
+        :model="form"
+        :rules="rules"
+        label-width="80px"
+        ref="apiForm"
+      >
         <el-form-item label="路径" prop="path">
           <el-input autocomplete="off" v-model="form.path"></el-input>
         </el-form-item>
@@ -77,7 +120,7 @@
               :key="item.value"
               :label="`${item.label}(${item.value})`"
               :value="item.value"
-              v-for="item in methodOptions"
+              v-for="item in methodOptions.value"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -90,211 +133,236 @@
       </el-form>
       <div class="warning">新增Api需要在角色管理内配置权限才可使用</div>
       <template #footer>
-         <div class="dialog-footer">
-            <el-button @click="closeDialog">取 消</el-button>
-            <el-button @click="enterDialog" type="primary">确 定</el-button>
-          </div>
+        <div class="dialog-footer">
+          <el-button @click="closeDialog">取 消</el-button>
+          <el-button @click="enterDialog" type="primary">确 定</el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
 </template>
 
-
 <script>
-// 获取列表内容封装在mixins内部  getTableData方法 初始化已封装完成 条件搜索时候 请把条件安好后台定制的结构体字段 放到 this.searchInfo 中即可实现条件搜索
-
-import {
-  getApiById,
-  getApiList,
-  createApi,
-  updateApi,
-  deleteApi
-} from '@/api/api'
-import infoList from '@/mixins/infoList'
-import { toSQLLine } from '@/utils/stringFun'
-const methodOptions = [
-  {
-    value: 'POST',
-    label: '创建',
-    type: 'success'
-  },
-  {
-    value: 'GET',
-    label: '查看',
-    type: ''
-  },
-  {
-    value: 'PUT',
-    label: '更新',
-    type: 'warning'
-  },
-  {
-    value: 'DELETE',
-    label: '删除',
-    type: 'danger'
-  }
-]
-
+import { getApiById, getApiList, createApi, updateApi, deleteApi } from "@/api/api";
+import { infoList } from "@/mixins/infoList";
+import { toSQLLine } from "@/utils/stringFun";
+import { ref, reactive, getCurrentInstance } from "vue";
 export default {
-  name: 'Api',
-  mixins: [infoList],
-  data() {
-    return {
-      listApi: getApiList,
-      dialogFormVisible: false,
-      dialogTitle: '新增Api',
-      form: {
-        path: '',
-        apiGroup: '',
-        method: '',
-        description: ''
+  name: "Api",
+  setup() {
+    const { ctx } = getCurrentInstance();
+    const {
+      page,
+      total,
+      pageSize,
+      tableData,
+      searchInfo,
+      filterDict,
+      handleSizeChange,
+      handleCurrentChange,
+      getTableData,
+    } = infoList(getApiList);
+    getTableData();
+    const dialogFormVisible = ref(false);
+    const dialogTitle = ref("新增Api");
+    const form = reactive({
+      path: "",
+      apiGroup: "",
+      method: "",
+      description: "",
+    });
+    const methodOptions = reactive([
+      {
+        value: "POST",
+        label: "创建",
+        type: "success",
       },
-      methodOptions: methodOptions,
-      type: '',
-      rules: {
-        path: [{ required: true, message: '请输入api路径', trigger: 'blur' }],
-        apiGroup: [
-          { required: true, message: '请输入组名称', trigger: 'blur' }
-        ],
-        method: [
-          { required: true, message: '请选择请求方式', trigger: 'blur' }
-        ],
-        description: [
-          { required: true, message: '请输入api介绍', trigger: 'blur' }
-        ]
-      }
-    }
-  },
-  methods: {
-     methodFiletr(value) {
-      const target = methodOptions.filter(item => item.value === value)[0]
+      {
+        value: "GET",
+        label: "查看",
+        type: "",
+      },
+      {
+        value: "PUT",
+        label: "更新",
+        type: "warning",
+      },
+      {
+        value: "DELETE",
+        label: "删除",
+        type: "danger",
+      },
+    ]);
+    const type = ref("");
+    const rules = reactive({
+      path: [{ required: true, message: "请输入api路径", trigger: "blur" }],
+      apiGroup: [{ required: true, message: "请输入组名称", trigger: "blur" }],
+      method: [{ required: true, message: "请选择请求方式", trigger: "blur" }],
+      description: [{ required: true, message: "请输入api介绍", trigger: "blur" }],
+    });
+
+    const methodFiletr = (value) => {
+      const target = methodOptions.filter((item) => item.value === value)[0];
       // return target && `${target.label}(${target.value})`
-      return target && `${target.label}`
-    },
-    tagTypeFiletr(value) {
-      const target = methodOptions.filter(item => item.value === value)[0]
-      return target && `${target.type}`
-    },
+      return target && `${target.label}`;
+    };
+    const tagTypeFiletr = (value) => {
+      const target = methodOptions.filter((item) => item.value === value)[0];
+      return target && `${target.type}`;
+    };
+
     // 排序
-    sortChange({ prop, order }) {
+    const sortChange = ({ prop, order }) => {
       if (prop) {
-        this.searchInfo.orderKey = toSQLLine(prop)
-        this.searchInfo.desc = order == 'descending'
+        searchInfo.orderKey = toSQLLine(prop);
+        searchInfo.desc = order == "descending";
       }
-      this.getTableData()
-    },
+      getTableData();
+    };
+
     //条件搜索前端看此方法
-    onSubmit() {
-      this.page = 1
-      this.pageSize = 10
-      this.getTableData()
-    },
-    initForm() {
-      this.$refs.apiForm.resetFields()
-      this.form= {
-        path: '',
-        apiGroup: '',
-        method: '',
-        description: ''
-      }
-    },
-    closeDialog() {
-      this.initForm()
-      this.dialogFormVisible = false
-    },
-    openDialog(type) {
-      switch (type) {
-        case 'addApi':
-          this.dialogTitlethis = '新增Api'
-          break
-        case 'edit':
-          this.dialogTitlethis = '编辑Api'
-          break
+    const onSubmit = () => {
+      page.value = 1;
+      pageSize.value = 10;
+      getTableData();
+    };
+
+    const initForm = () => {
+      console.log(ctx.$refs);
+      ctx.$refs.apiForm.resetFields();
+      form.path = "";
+      form.apiGroup = "";
+      form.method = "";
+      form.description = "";
+    };
+
+    const closeDialog = () => {
+      initForm();
+      dialogFormVisible.value = false;
+    };
+
+    const openDialog = (inType) => {
+      switch (inType) {
+        case "addApi":
+          dialogTitle.value = "新增Api";
+          break;
+        case "edit":
+          dialogTitle.value = "编辑Api";
+          break;
         default:
-          break
+          break;
       }
-      this.type = type
-      this.dialogFormVisible = true
-    },
-    async editApi(row) {
-      const res = await getApiById({ id: row.ID })
-      this.form = res.data.api
-      this.openDialog('edit')
-    },
-    async deleteApi(row) {
-      this.$confirm('此操作将永久删除所有角色下该菜单, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
+      type.value = inType;
+      dialogFormVisible.value = true;
+    };
+
+    const editApi = async (row) => {
+      const res = await getApiById({ id: row.ID });
+      form.path = res.data.api.path;
+      form.apiGroup = "";
+      form.method = "";
+      form.description = "";
+      console.log(form);
+      openDialog("edit");
+    };
+    const deleteApiFun = async (row) => {
+      ctx
+        .$confirm("此操作将永久删除所有角色下该菜单, 是否继续?", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        })
         .then(async () => {
-          const res = await deleteApi(row)
+          const res = await deleteApi(row);
           if (res.code == 0) {
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            })
-            this.getTableData()
+            ctx.$message({
+              type: "success",
+              message: "删除成功!",
+            });
+            getTableData();
           }
         })
         .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          })
-        })
-    },
-    async enterDialog() {
-      this.$refs.apiForm.validate(async valid => {
+          ctx.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
+    };
+    const enterDialog = async () => {
+      ctx.$refs.apiForm.validate(async (valid) => {
         if (valid) {
-          switch (this.type) {
-            case 'addApi':
+          switch (type.value) {
+            case "addApi":
               {
-                const res = await createApi(this.form)
+                const res = await createApi(form);
                 if (res.code == 0) {
-                  this.$message({
-                    type: 'success',
-                    message: '添加成功',
-                    showClose: true
-                  })
+                  ctx.$message({
+                    type: "success",
+                    message: "添加成功",
+                    showClose: true,
+                  });
                 }
-                this.getTableData()
-                this.closeDialog()
+                getTableData();
+                closeDialog();
               }
 
-              break
-            case 'edit':
+              break;
+            case "edit":
               {
-                const res = await updateApi(this.form)
+                const res = await updateApi(this.form);
                 if (res.code == 0) {
-                  this.$message({
-                    type: 'success',
-                    message: '编辑成功',
-                    showClose: true
-                  })
+                  ctx.$message({
+                    type: "success",
+                    message: "编辑成功",
+                    showClose: true,
+                  });
                 }
-                this.getTableData()
-                this.closeDialog()
+                getTableData();
+                closeDialog();
               }
-              break
+              break;
             default:
               {
-                this.$message({
-                  type: 'error',
-                  message: '未知操作',
-                  showClose: true
-                })
+                ctx.$message({
+                  type: "error",
+                  message: "未知操作",
+                  showClose: true,
+                });
               }
-              break
+              break;
           }
         }
-      })
-    }
+      });
+    };
+
+    return {
+      page,
+      total,
+      pageSize,
+      tableData,
+      searchInfo,
+      filterDict,
+      handleSizeChange,
+      handleCurrentChange,
+      getTableData,
+      dialogFormVisible,
+      deleteApiFun,
+      dialogTitle,
+      rules,
+      methodFiletr,
+      tagTypeFiletr,
+      sortChange,
+      onSubmit,
+      editApi,
+      enterDialog,
+      closeDialog,
+      methodOptions,
+      openDialog,
+      form,
+    };
   },
-  created(){
-    this.getTableData()
-  }
-}
+};
 </script>
 <style scoped lang="scss">
 .button-box {
