@@ -1,18 +1,24 @@
 <template>
   <div>
     <div class="search-term">
-      <el-form :inline="true" :model="searchInfo" class="demo-form-inline">
+      <el-form :inline="true" :model="tableInfo.searchInfo" class="demo-form-inline">
         <el-form-item label="路径">
-          <el-input placeholder="路径" v-model="searchInfo.path"></el-input>
+          <el-input placeholder="路径" v-model="tableInfo.searchInfo.path"></el-input>
         </el-form-item>
         <el-form-item label="描述">
-          <el-input placeholder="描述" v-model="searchInfo.description"></el-input>
+          <el-input
+            placeholder="描述"
+            v-model="tableInfo.searchInfo.description"
+          ></el-input>
         </el-form-item>
         <el-form-item label="api组">
-          <el-input placeholder="api组" v-model="searchInfo.apiGroup"></el-input>
+          <el-input
+            placeholder="api组"
+            v-model="tableInfo.searchInfo.apiGroup"
+          ></el-input>
         </el-form-item>
         <el-form-item label="请求">
-          <el-select clearable placeholder="请选择" v-model="searchInfo.method">
+          <el-select clearable placeholder="请选择" v-model="tableInfo.searchInfo.method">
             <el-option
               :key="item.value"
               :label="`${item.label}(${item.value})`"
@@ -29,7 +35,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <el-table :data="tableData.value" @sort-change="sortChange" border stripe>
+    <el-table :data="tableInfo.tableData" @sort-change="sortChange" border stripe>
       <el-table-column
         label="id"
         min-width="60"
@@ -89,11 +95,11 @@
       </el-table-column>
     </el-table>
     <el-pagination
-      :current-page="page"
-      :page-size="pageSize"
+      :current-page="tableInfo.page"
+      :page-size="tableInfo.pageSize"
       :page-sizes="[10, 30, 50, 100]"
       :style="{ float: 'right', padding: '20px' }"
-      :total="total"
+      :total="tableInfo.total"
       @current-change="handleCurrentChange"
       @size-change="handleSizeChange"
       layout="total, sizes, prev, pager, next, jumper"
@@ -120,7 +126,7 @@
               :key="item.value"
               :label="`${item.label}(${item.value})`"
               :value="item.value"
-              v-for="item in methodOptions.value"
+              v-for="item in methodOptions"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -151,26 +157,17 @@ export default {
   name: "Api",
   setup() {
     const { ctx } = getCurrentInstance();
-    const {
-      page,
-      total,
-      pageSize,
-      tableData,
-      searchInfo,
-      filterDict,
-      handleSizeChange,
-      handleCurrentChange,
-      getTableData,
-    } = infoList(getApiList);
-    getTableData();
-    const dialogFormVisible = ref(false);
-    const dialogTitle = ref("新增Api");
-    const form = reactive({
-      path: "",
-      apiGroup: "",
-      method: "",
-      description: "",
+    const { tableInfo, handleSizeChange, handleCurrentChange, getTableData } = infoList(
+      getApiList
+    );
+
+    const rules = reactive({
+      path: [{ required: true, message: "请输入api路径", trigger: "blur" }],
+      apiGroup: [{ required: true, message: "请输入组名称", trigger: "blur" }],
+      method: [{ required: true, message: "请选择请求方式", trigger: "blur" }],
+      description: [{ required: true, message: "请输入api介绍", trigger: "blur" }],
     });
+    // 静态字典选项
     const methodOptions = reactive([
       {
         value: "POST",
@@ -193,54 +190,54 @@ export default {
         type: "danger",
       },
     ]);
+    //条件搜索前端看此方法
+    const onSubmit = () => {
+      tableInfo.page = 1;
+      tableInfo.value = 10;
+      getTableData();
+    };
+    // 先获取默认的表格信息
+    getTableData();
+    // 弹窗相关内容
+    const dialogFormVisible = ref(false);
+    const dialogTitle = ref("新增Api");
     const type = ref("");
-    const rules = reactive({
-      path: [{ required: true, message: "请输入api路径", trigger: "blur" }],
-      apiGroup: [{ required: true, message: "请输入组名称", trigger: "blur" }],
-      method: [{ required: true, message: "请选择请求方式", trigger: "blur" }],
-      description: [{ required: true, message: "请输入api介绍", trigger: "blur" }],
+    const form = reactive({
+      ID:0,
+      path: "",
+      apiGroup: "",
+      method: "",
+      description: "",
     });
-
-    const methodFiletr = (value) => {
-      const target = methodOptions.filter((item) => item.value === value)[0];
-      // return target && `${target.label}(${target.value})`
-      return target && `${target.label}`;
-    };
-    const tagTypeFiletr = (value) => {
-      const target = methodOptions.filter((item) => item.value === value)[0];
-      return target && `${target.type}`;
-    };
-
     // 排序
     const sortChange = ({ prop, order }) => {
       if (prop) {
-        searchInfo.orderKey = toSQLLine(prop);
-        searchInfo.desc = order == "descending";
+        tableInfo.searchInfo.orderKey = toSQLLine(prop);
+        tableInfo.searchInfo.desc = order == "descending";
       }
       getTableData();
     };
 
-    //条件搜索前端看此方法
-    const onSubmit = () => {
-      page.value = 1;
-      pageSize.value = 10;
-      getTableData();
-    };
-
+    // 初始化表单
     const initForm = () => {
       console.log(ctx.$refs);
       ctx.$refs.apiForm.resetFields();
-      form.path = "";
-      form.apiGroup = "";
-      form.method = "";
-      form.description = "";
+      Object.assign(form, {
+        ID:0,
+        path: "",
+        apiGroup: "",
+        method: "",
+        description: "",
+      });
     };
 
+    // 关闭弹窗
     const closeDialog = () => {
       initForm();
       dialogFormVisible.value = false;
     };
 
+    // 开启弹窗
     const openDialog = (inType) => {
       switch (inType) {
         case "addApi":
@@ -256,39 +253,7 @@ export default {
       dialogFormVisible.value = true;
     };
 
-    const editApi = async (row) => {
-      const res = await getApiById({ id: row.ID });
-      form.path = res.data.api.path;
-      form.apiGroup = "";
-      form.method = "";
-      form.description = "";
-      console.log(form);
-      openDialog("edit");
-    };
-    const deleteApiFun = async (row) => {
-      ctx
-        .$confirm("此操作将永久删除所有角色下该菜单, 是否继续?", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
-        })
-        .then(async () => {
-          const res = await deleteApi(row);
-          if (res.code == 0) {
-            ctx.$message({
-              type: "success",
-              message: "删除成功!",
-            });
-            getTableData();
-          }
-        })
-        .catch(() => {
-          ctx.$message({
-            type: "info",
-            message: "已取消删除",
-          });
-        });
-    };
+    // 确定弹窗
     const enterDialog = async () => {
       ctx.$refs.apiForm.validate(async (valid) => {
         if (valid) {
@@ -306,11 +271,10 @@ export default {
                 getTableData();
                 closeDialog();
               }
-
               break;
             case "edit":
               {
-                const res = await updateApi(this.form);
+                const res = await updateApi(form);
                 if (res.code == 0) {
                   ctx.$message({
                     type: "success",
@@ -336,16 +300,53 @@ export default {
       });
     };
 
+    const editApi = async (row) => {
+      const res = await getApiById({ id: row.ID });
+      Object.assign(form, res.data.api);
+      openDialog("edit");
+    };
+
+    // 删除方法
+    const deleteApiFun = async (row) => {
+      ctx
+        .$confirm("此操作将永久删除所有角色下该菜单, 是否继续?", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        })
+        .then(async () => {
+          const res = await deleteApi(row);
+          if (res.code == 0) {
+            ctx.$message({
+              type: "success",
+              message: "删除成功!",
+            });
+            getTableData();
+          }
+        })
+        .catch(() => {
+          ctx.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
+    };
+
+    // 展示筛选方法
+    const methodFiletr = (value) => {
+      const target = methodOptions.filter((item) => item.value === value)[0];
+      // return target && `${target.label}(${target.value})`
+      return target && `${target.label}`;
+    };
+    const tagTypeFiletr = (value) => {
+      const target = methodOptions.filter((item) => item.value === value)[0];
+      return target && `${target.type}`;
+    };
+
     return {
-      page,
-      total,
-      pageSize,
-      tableData,
-      searchInfo,
-      filterDict,
+      tableInfo,
       handleSizeChange,
       handleCurrentChange,
-      getTableData,
       dialogFormVisible,
       deleteApiFun,
       dialogTitle,

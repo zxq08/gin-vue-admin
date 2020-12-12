@@ -1,48 +1,46 @@
 import { getDict } from "@/utils/dictionary";
 import { reactive, ref } from "vue"
 export const infoList = (listApi) => {
-    const page = ref(1)
-    const total = ref(10)
-    const pageSize = ref(10)
-    const tableData = reactive([])
-    const searchInfo = reactive({})
+    const tableInfo = reactive({
+        page: 1,
+        total: 10,
+        pageSize: 10,
+        tableData: [],
+        searchInfo: {}
+    })
 
     const filterDict = (value, options) => {
         const rowLabel = options.filter(item => item.value == value)
         return rowLabel && rowLabel[0] && rowLabel[0].label
     }
-    const getDict = async(type) => {
+    const getDictFun = async(type) => {
         const dicts = await getDict(type)
         return dicts
     }
 
     const handleSizeChange = (val) => {
-        pageSize.value = val
+        tableInfo.pageSize = val
         getTableData()
     }
 
     const handleCurrentChange = (val) => {
-        page.value = val
+        tableInfo.page = val
         getTableData()
     }
 
     const getTableData = async() => {
-        const res = await listApi({ page: page.value, pageSize: pageSize.value, ...searchInfo })
+        const res = await listApi({ page: tableInfo.page, pageSize: tableInfo.pageSize, ...tableInfo.searchInfo })
         if (res.code == 0) {
-            tableData.value = res.data.list
-            total.value = res.data.total
-            page.value = res.data.page
-            pageSize.value = res.data.pageSize
+            tableInfo.tableData = res.data.list
+            tableInfo.total = res.data.total
+            tableInfo.page = res.data.page
+            tableInfo.pageSize = res.data.pageSize
         }
     }
     return {
-        page,
-        total,
-        pageSize,
-        tableData,
-        searchInfo,
+        tableInfo,
         filterDict,
-        getDict,
+        getDictFun,
         handleSizeChange,
         handleCurrentChange,
         getTableData,
