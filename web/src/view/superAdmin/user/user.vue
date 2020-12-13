@@ -3,7 +3,7 @@
     <div class="button-box clearflex">
       <el-button @click="addUser" type="primary">新增用户</el-button>
     </div>
-    <el-table :data="tableData" border stripe>
+    <el-table :data="tableInfo.tableData" border stripe>
       <el-table-column label="头像" min-width="50">
         <template #default="scope">
           <div :style="{'textAlign':'center'}">
@@ -32,22 +32,21 @@
             <p>确定要删除此用户吗</p>
             <div style="text-align: right; margin: 0">
               <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
-              <el-button type="primary" size="mini" @click="deleteUser(scope.row)">确定</el-button>
+              <el-button type="primary" size="mini" @click="deleteUserFun(scope.row)">确定</el-button>
             </div>
             <template #reference>
-
-            <el-button type="danger" icon="el-icon-delete" size="small">删除</el-button>
+              <el-button type="danger" icon="el-icon-delete" size="small">删除</el-button>
             </template>
           </el-popover>
         </template>
       </el-table-column>
     </el-table>
     <el-pagination
-      :current-page="page"
-      :page-size="pageSize"
+      :current-page="tableInfo.page"
+      :page-size="tableInfo.pageSize"
       :page-sizes="[10, 30, 50, 100]"
       :style="{float:'right',padding:'20px'}"
-      :total="total"
+      :total="tableInfo.total"
       @current-change="handleCurrentChange"
       @size-change="handleSizeChange"
       layout="total, sizes, prev, pager, next, jumper"
@@ -72,7 +71,7 @@
         </el-form-item>
         <el-form-item label="用户角色" label-width="80px" prop="authorityId">
           <el-cascader
-            @change="changeAuthority(scope.row)"
+            @change="changeAuthority(userInfo)"
             v-model="userInfo.authorityId"
             :options="authOptions"
             :show-all-levels="false"
@@ -82,13 +81,13 @@
         </el-form-item>
       </el-form>
       <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="closeAddUserDialog">取 消</el-button>
-        <el-button @click="enterAddUserDialog" type="primary">确 定</el-button>
-      </div>
+        <div class="dialog-footer">
+          <el-button @click="closeAddUserDialog">取 消</el-button>
+          <el-button @click="enterAddUserDialog" type="primary">确 定</el-button>
+        </div>
       </template>
     </el-dialog>
-    <ChooseImg ref="chooseImg" :target="userInfo" :targetKey="`headerImg`"/>
+    <ChooseImg ref="chooseImg" :target="userInfo" :targetKey="`headerImg`" />
   </div>
 </template>
 
@@ -103,57 +102,57 @@ import {
   deleteUser
 } from "@/api/user";
 import { getAuthorityList } from "@/api/authority";
-import infoList from "@/mixins/infoList";
 import { mapGetters } from "vuex";
 import CustomPic from "@/components/customPic";
 import ChooseImg from "@/components/chooseImg";
+import { infoList } from "@/mixins/infoList";
+import { ref, reactive, getCurrentInstance } from "vue";
 export default {
   name: "Api",
-  mixins: [infoList],
-  components: { CustomPic,ChooseImg },
-  data() {
-    return {
-      listApi: getUserList,
-      path: path,
-      authOptions: [],
-      addUserDialog: false,
-      userInfo: {
-        username: "",
-        password: "",
-        nickName: "",
-        headerImg: "",
-        authorityId: ""
-      },
-      rules: {
-        username: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 6, message: "最低6位字符", trigger: "blur" }
-        ],
-        password: [
-          { required: true, message: "请输入用户密码", trigger: "blur" },
-          { min: 6, message: "最低6位字符", trigger: "blur" }
-        ],
-        nickName: [
-          { required: true, message: "请输入用户昵称", trigger: "blur" }
-        ],
-        authorityId: [
-          { required: true, message: "请选择用户角色", trigger: "blur" }
-        ]
-      }
+  components: { CustomPic, ChooseImg },
+  setup(props) {
+    const { ctx } = getCurrentInstance();
+    const {
+      tableInfo,
+      handleSizeChange,
+      handleCurrentChange,
+      getTableData
+    } = infoList(getUserList);
+    const authOptions = reactive([]);
+    const addUserDialog = ref(false);
+    const userInfo = reactive({
+      username: "",
+      password: "",
+      nickName: "",
+      headerImg: "",
+      authorityId: ""
+    });
+    const rules = reactive({
+      username: [
+        { required: true, message: "请输入用户名", trigger: "blur" },
+        { min: 6, message: "最低6位字符", trigger: "blur" }
+      ],
+      password: [
+        { required: true, message: "请输入用户密码", trigger: "blur" },
+        { min: 6, message: "最低6位字符", trigger: "blur" }
+      ],
+      nickName: [
+        { required: true, message: "请输入用户昵称", trigger: "blur" }
+      ],
+      authorityId: [
+        { required: true, message: "请选择用户角色", trigger: "blur" }
+      ]
+    });
+
+    const openHeaderChange = () => {
+      ctx.$refs.chooseImg.open();
     };
-  },
-  computed: {
-    ...mapGetters("user", ["token"])
-  },
-  methods: {
-    openHeaderChange(){
-      this.$refs.chooseImg.open()
-    },
-    setOptions(authData) {
-      this.authOptions = [];
-      this.setAuthorityOptions(authData, this.authOptions);
-    },
-    setAuthorityOptions(AuthorityData, optionsData) {
+
+    const setOptions = authData => {
+      authOptions.length = 0;
+      setAuthorityOptions(authData, authOptions);
+    };
+    const setAuthorityOptions = (AuthorityData, optionsData) => {
       AuthorityData &&
         AuthorityData.map(item => {
           if (item.children && item.children.length) {
@@ -162,7 +161,7 @@ export default {
               authorityName: item.authorityName,
               children: []
             };
-            this.setAuthorityOptions(item.children, option.children);
+            setAuthorityOptions(item.children, option.children);
             optionsData.push(option);
           } else {
             const option = {
@@ -172,55 +171,70 @@ export default {
             optionsData.push(option);
           }
         });
-    },
-    async deleteUser(row) {
+    };
+    const deleteUserFun = async row => {
       const res = await deleteUser({ id: row.ID });
       if (res.code == 0) {
-        this.getTableData();
+        getTableData();
         row.visible = false;
       }
-    },
-    async enterAddUserDialog() {
-      this.$refs.userForm.validate(async valid => {
+    };
+    const enterAddUserDialog = async () => {
+      ctx.$refs.userForm.validate(async valid => {
         if (valid) {
-          const res = await register(this.userInfo);
+          const res = await register(userInfo);
           if (res.code == 0) {
-            this.$message({ type: "success", message: "创建成功" });
+            ctx.$message({ type: "success", message: "创建成功" });
           }
-          await this.getTableData();
-          this.closeAddUserDialog();
+          await getTableData();
+          closeAddUserDialog();
         }
       });
-    },
-    closeAddUserDialog() {
-      this.$refs.userForm.resetFields();
-      this.addUserDialog = false;
-    },
-    handleAvatarSuccess(res) {
-      this.userInfo.headerImg = res.data.file.url;
-    },
-    addUser() {
-      this.addUserDialog = true;
-    },
-    async changeAuthority(row) {
+    };
+    const closeAddUserDialog = () => {
+      ctx.$refs.userForm.resetFields();
+      addUserDialog.value = false;
+    };
+
+    const addUser = () => {
+      addUserDialog.value = true;
+    };
+    const changeAuthority = async row => {
       const res = await setUserAuthority({
         uuid: row.uuid,
         authorityId: row.authority.authorityId
       });
       if (res.code == 0) {
-        this.$message({ type: "success", message: "角色设置成功" });
+        ctx.$message({ type: "success", message: "角色设置成功" });
       }
-    }
-  },
-  async created() {
-    this.getTableData();
-    const res = await getAuthorityList({ page: 1, pageSize: 999 });
-    this.setOptions(res.data.list);
+    };
+
+    const instUser = async () => {
+      getTableData();
+      const res = await getAuthorityList({ page: 1, pageSize: 999 });
+      setOptions(res.data.list);
+    };
+
+    instUser();
+    return {
+      tableInfo,
+      handleSizeChange,
+      handleCurrentChange,
+      path,
+      authOptions,
+      addUserDialog,
+      userInfo,
+      rules,
+      changeAuthority,
+      addUser,
+      closeAddUserDialog,
+      enterAddUserDialog,
+      deleteUserFun
+    };
   }
 };
 </script>
 <style lang="scss">
-
 .button-box {
   padding: 10px 20px;
   .el-button {
@@ -230,14 +244,14 @@ export default {
 
 .user-dialog {
   .header-img-box {
-  width: 200px;
-  height: 200px;
-  border: 1px dashed #ccc;
-  border-radius: 20px;
-  text-align: center;
-  line-height: 200px;
-  cursor: pointer;
-}
+    width: 200px;
+    height: 200px;
+    border: 1px dashed #ccc;
+    border-radius: 20px;
+    text-align: center;
+    line-height: 200px;
+    cursor: pointer;
+  }
   .avatar-uploader .el-upload:hover {
     border-color: #409eff;
   }
