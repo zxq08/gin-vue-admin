@@ -2,7 +2,7 @@
   <div class="router-history">
     <el-tabs
       :closable="!(historys.length==1&&this.$route.name=='dashboard')"
-      @contextmenu.prevent.native="openContextMenu($event)"
+      @contextmenu.prevent="openContextMenu($event)"
       @tab-click="changeTab"
       @tab-remove="removeTab"
       type="card"
@@ -27,6 +27,7 @@
   </div>
 </template>
 <script>
+import { emitter } from '@/utils/mitt'
 export default {
   name: 'HistoryComponent',
   data() {
@@ -42,10 +43,10 @@ export default {
     }
   },
   created() {
-    this.$bus.on('mobile', isMobile => {
+    emitter.on('mobile', isMobile => {
       this.isMobile = isMobile
     })
-    this.$bus.on('collapse', isCollapse => {
+    emitter.on('collapse', isCollapse => {
       this.isCollapse = isCollapse
     })
     const initHistorys = [
@@ -61,9 +62,9 @@ export default {
     this.setTab(this.$route)
   },
 
-  beforeDestroy() {
-    this.$bus.off('collapse')
-    this.$bus.off('mobile')
+  beforeUnmount() {
+    emitter.off('collapse')
+    emitter.off('mobile')
   },
   methods: {
     openContextMenu(e) {
@@ -162,7 +163,7 @@ export default {
       this.activeValue = this.$route.name
     },
     changeTab(component) {
-      const tab = component.$attrs.tab
+      const tab = component.instance.attrs.tab
       this.$router.push({ name: tab.name,query:tab.query,params:tab.params })
     },
     removeTab(tab) {

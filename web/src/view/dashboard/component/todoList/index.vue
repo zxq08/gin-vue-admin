@@ -13,9 +13,9 @@
                         v-for="(todo, index) in filteredTodos"
                         :key="index"
                         :todo="todo"
-                        @toggleTodo="toggleTodo"
-                        @editTodo="editTodo"
-                        @deleteTodo="deleteTodo"
+                        @toggle-todo="toggleTodo"
+                        @edit-todo="editTodo"
+                        @delete-todo="deleteTodo"
                 />
             </ul>
         </section>
@@ -23,11 +23,11 @@
         <footer v-show="todos.length" class="footer">
       <span class="todo-count">
         <strong>{{ remaining }}</strong>
-        {{ remaining | pluralize('item') }} left
+        {{ pluralize(remaining,'item') }} left
       </span>
             <ul class="filters">
                 <li v-for="(val, key) in filters" :key="key">
-                    <a :class="{ selected: visibility === key }" @click.prevent="visibility = key">{{ key | capitalize }}</a>
+                    <a :class="{ selected: visibility === key }" @click.prevent="visibility = key">{{ capitalize(key) }}</a>
                 </li>
             </ul>
             <!-- <button class="clear-completed" v-show="todos.length > remaining" @click="clearCompleted">
@@ -47,16 +47,12 @@
         completed: todos => todos.filter(todo => todo.done)
     }
     const defalutList = [
-        { text: '工作流功能绘制工具', done: false },
-        { text: '工作流流转方法', done: false },
+        { text: '审批流功能绘制工具', done: false },
+        { text: '审批流流转方法', done: false },
         { text: '自动化代码优化', done: false }
     ]
     export default {
         components: { Todo },
-        filters: {
-            pluralize: (n, w) => n === 1 ? w : w + 's',
-            capitalize: s => s.charAt(0).toUpperCase() + s.slice(1)
-        },
         data() {
             return {
                 visibility: 'all',
@@ -77,6 +73,8 @@
             }
         },
         methods: {
+            pluralize: (n, w) => n === 1 ? w : w + 's',
+            capitalize: s => s.charAt(0).toUpperCase() + s.slice(1),
             setLocalStorage() {
                 window.localStorage.setItem(STORAGE_KEY, JSON.stringify(this.todos))
             },

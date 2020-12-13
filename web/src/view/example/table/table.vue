@@ -12,18 +12,18 @@
     >
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column label="日期" width="120">
-        <template slot-scope="scope">{{ scope.row.date }}</template>
+        <template #default="scope">{{ scope.row.date }}</template>
       </el-table-column>
       <el-table-column label="姓名" prop="name" width="120"></el-table-column>
       <el-table-column label="年龄" prop="age" width="120"></el-table-column>
       <el-table-column label="住址" prop="address" min-width="200" show-overflow-tooltip></el-table-column>
       <el-table-column label="是否禁用" prop="switch" width="180">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-switch active-text="开启" inactive-text="禁用" v-model="scope.row.switch"></el-switch>
         </template>
       </el-table-column>
       <el-table-column label="按钮组" width="200">
-        <template slot-scope="scope" >
+        <template #default="scope" >
             <el-button type="text" size="small" @click="toggleSelection([scope.row])">按钮1</el-button>
             <el-button type="text" size="small" @click="toggleSelection([scope.row])">按钮2</el-button>
             <el-button type="text" size="small" @click="toggleSelection([scope.row])">按钮3</el-button>

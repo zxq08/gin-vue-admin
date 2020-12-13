@@ -3,13 +3,19 @@
     <div class="search-term">
       <el-form :inline="true" :model="searchInfo" class="demo-form-inline">
         <el-form-item label="请求方法">
-          <el-input placeholder="搜索条件" v-model="searchInfo.method"></el-input>
+          <el-input
+            placeholder="搜索条件"
+            v-model="searchInfo.method"
+          ></el-input>
         </el-form-item>
         <el-form-item label="请求路径">
           <el-input placeholder="搜索条件" v-model="searchInfo.path"></el-input>
         </el-form-item>
         <el-form-item label="结果状态码">
-          <el-input placeholder="搜索条件" v-model="searchInfo.status"></el-input>
+          <el-input
+            placeholder="搜索条件"
+            v-model="searchInfo.status"
+          ></el-input>
         </el-form-item>
         <el-form-item>
           <el-button @click="onSubmit" type="primary">查询</el-button>
@@ -18,10 +24,18 @@
           <el-popover placement="top" v-model="deleteVisible" width="160">
             <p>确定要删除吗？</p>
             <div style="text-align: right; margin: 0">
-              <el-button @click="deleteVisible = false" size="mini" type="text">取消</el-button>
-              <el-button @click="onDelete" size="mini" type="primary">确定</el-button>
+              <el-button @click="deleteVisible = false" size="mini" type="text"
+                >取消</el-button
+              >
+              <el-button @click="onDelete" size="mini" type="primary"
+                >确定</el-button
+              >
             </div>
-            <el-button icon="el-icon-delete" size="mini" slot="reference" type="danger">批量删除</el-button>
+            <template #reference>
+              <el-button icon="el-icon-delete" size="mini" type="danger"
+                >批量删除</el-button
+              >
+            </template>
           </el-popover>
         </el-form-item>
       </el-form>
@@ -37,59 +51,100 @@
     >
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column label="操作人" width="140">
-        <template slot-scope="scope">
-          <div>{{scope.row.user.userName}}({{scope.row.user.nickName}})</div>
+        <template #default="scope">
+          <div>
+            {{ scope.row.user.userName }}({{ scope.row.user.nickName }})
+          </div>
         </template>
       </el-table-column>
       <el-table-column label="日期" width="180">
-        <template slot-scope="scope">{{scope.row.CreatedAt|formatDate}}</template>
+        <template #default="scope">
+          {{
+           formatDate(scope.row.CreatedAt)
+        }}</template>
       </el-table-column>
       <el-table-column label="状态码" prop="status" width="120">
-        <template slot-scope="scope">
+        <template #default="scope">
           <div>
             <el-tag type="success">{{ scope.row.status }}</el-tag>
           </div>
         </template>
       </el-table-column>
       <el-table-column label="请求ip" prop="ip" width="120"></el-table-column>
-      <el-table-column label="请求方法" prop="method" width="120"></el-table-column>
-      <el-table-column label="请求路径" prop="path" width="240"></el-table-column>
+      <el-table-column
+        label="请求方法"
+        prop="method"
+        width="120"
+      ></el-table-column>
+      <el-table-column
+        label="请求路径"
+        prop="path"
+        width="240"
+      ></el-table-column>
       <el-table-column label="请求" prop="path" width="80">
-        <template slot-scope="scope">
+        <template #default="scope">
           <div>
-            <el-popover placement="top-start" trigger="hover" v-if="scope.row.body">
+            <el-popover
+              placement="top-start"
+              trigger="hover"
+              v-if="scope.row.body"
+            >
               <div class="popover-box">
-                <pre>{{fmtBody(scope.row.body)}}</pre>
+                <pre>{{ fmtBody(scope.row.body) }}</pre>
               </div>
-              <i class="el-icon-view" slot="reference"></i>
+              <template #reference>
+                <i class="el-icon-view"></i>
+              </template>
             </el-popover>
-
             <span v-else>无</span>
           </div>
         </template>
       </el-table-column>
       <el-table-column label="响应" prop="path" width="80">
-        <template slot-scope="scope">
+        <template #default="scope">
           <div>
-            <el-popover placement="top-start" trigger="hover" v-if="scope.row.resp">
+            <el-popover
+              placement="top-start"
+              trigger="hover"
+              v-if="scope.row.resp"
+            >
               <div class="popover-box">
-                <pre>{{fmtBody(scope.row.resp)}}</pre>
+                <pre>{{ fmtBody(scope.row.resp) }}</pre>
               </div>
-              <i class="el-icon-view" slot="reference"></i>
+              <template #reference>
+                <i class="el-icon-view"></i>
+              </template>
             </el-popover>
             <span v-else>无</span>
           </div>
         </template>
       </el-table-column>
       <el-table-column label="按钮组">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-popover placement="top" v-model="scope.row.visible" width="160">
             <p>确定要删除吗？</p>
             <div style="text-align: right; margin: 0">
-              <el-button @click="scope.row.visible = false" size="mini" type="text">取消</el-button>
-              <el-button @click="deleteSysOperationRecord(scope.row)" size="mini" type="primary">确定</el-button>
+              <el-button
+                @click="scope.row.visible = false"
+                size="mini"
+                type="text"
+                >取消</el-button
+              >
+              <el-button
+                @click="deleteSysOperationRecord(scope.row)"
+                size="mini"
+                type="primary"
+                >确定</el-button
+              >
             </div>
-            <el-button icon="el-icon-delete" size="mini" slot="reference" type="danger">删除</el-button>
+            <template #reference>
+            <el-button
+              icon="el-icon-delete"
+              size="mini"
+              type="danger"
+              >删除</el-button
+            >
+            </template>
           </el-popover>
         </template>
       </el-table-column>
@@ -98,7 +153,7 @@
       :current-page="page"
       :page-size="pageSize"
       :page-sizes="[10, 30, 50, 100]"
-      :style="{float:'right',padding:'20px'}"
+      :style="{ float: 'right', padding: '20px' }"
       :total="total"
       @current-change="handleCurrentChange"
       @size-change="handleSizeChange"
@@ -139,7 +194,8 @@ export default {
       }
     }
   },
-  filters: {
+ 
+  methods: {
     formatDate: function(time) {
       if (time != null && time != '') {
         var date = new Date(time)
@@ -154,9 +210,7 @@ export default {
       } else {
         return ''
       }
-    }
-  },
-  methods: {
+    },
     //条件搜索前端看此方法
     onSubmit() {
       this.page = 1

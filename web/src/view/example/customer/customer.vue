@@ -17,13 +17,13 @@
     >
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column label="接入日期" width="180">
-        <template slot-scope="scope">{{ scope.row.CreatedAt|formatDate }}</template>
+        <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
       </el-table-column>
       <el-table-column label="姓名" prop="customerName" width="120"></el-table-column>
       <el-table-column label="电话" prop="customerPhoneData" width="120"></el-table-column>
       <el-table-column label="接入人ID" prop="sysUserId" width="120"></el-table-column>
       <el-table-column label="按钮组" min-width="160">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-button @click="updateCustomer(scope.row)" size="small" type="text">变更</el-button>
           <el-popover placement="top" width="160" v-model="scope.row.visible">
             <p>确定要删除吗？</p>
@@ -31,7 +31,10 @@
               <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
               <el-button type="primary" size="mini" @click="deleteCustomer(scope.row)">确定</el-button>
             </div>
-            <el-button type="danger" icon="el-icon-delete" size="mini" slot="reference">删除</el-button>
+            <template #reference>
+
+            <el-button type="danger" icon="el-icon-delete" size="mini" >删除</el-button>
+            </template>
           </el-popover>
         </template>
       </el-table-column>
@@ -48,7 +51,7 @@
       layout="total, sizes, prev, pager, next, jumper"
     ></el-pagination>
 
-    <el-dialog :before-close="closeDialog" :visible.sync="dialogFormVisible" title="客户">
+    <el-dialog :before-close="closeDialog" v-model="dialogFormVisible" title="客户">
       <el-form :inline="true" :model="form" label-width="80px">
         <el-form-item label="客户名">
           <el-input autocomplete="off" v-model="form.customerName"></el-input>
@@ -57,10 +60,12 @@
           <el-input autocomplete="off" v-model="form.customerPhoneData"></el-input>
         </el-form-item>
       </el-form>
-      <div class="dialog-footer" slot="footer">
+      <template #footer>
+      <div class="dialog-footer">
         <el-button @click="closeDialog">取 消</el-button>
         <el-button @click="enterDialog" type="primary">确 定</el-button>
       </div>
+      </template>
     </el-dialog>
     <div class="tips"> 在资源权限中将此角色的资源权限清空 或者不包含创建者的角色 即可屏蔽此客户资源的显示</div>
   </div>
@@ -92,7 +97,8 @@ export default {
       }
     };
   },
-  filters: {
+  
+  methods: {
     formatDate: function(time) {
       if (time != null && time != "") {
         var date = new Date(time);
@@ -100,9 +106,7 @@ export default {
       } else {
         return "";
       }
-    }
-  },
-  methods: {
+    },
     async updateCustomer(row) {
       const res = await getExaCustomer({ ID: row.ID });
       this.type = "update";

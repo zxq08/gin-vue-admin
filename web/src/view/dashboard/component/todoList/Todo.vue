@@ -49,13 +49,13 @@
         },
         methods: {
             deleteTodo(todo) {
-                this.$emit('deleteTodo', todo)
+                this.$emit('delete-todo', todo)
             },
             editTodo({ todo, value }) {
-                this.$emit('editTodo', { todo, value })
+                this.$emit('edit-todo', { todo, value })
             },
             toggleTodo(todo) {
-                this.$emit('toggleTodo', todo)
+                this.$emit('toggle-todo', todo)
             },
             doneEdit(e) {
                 const value = e.target.value.trim()

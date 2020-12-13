@@ -1,40 +1,48 @@
 import { getDict } from "@/utils/dictionary";
-export default {
-    data() {
-        return {
-            page: 1,
-            total: 10,
-            pageSize: 10,
-            tableData: [],
-            searchInfo: {}
+import { reactive, ref } from "vue"
+export const infoList = (listApi) => {
+    const tableInfo = reactive({
+        page: 1,
+        total: 10,
+        pageSize: 10,
+        tableData: [],
+        searchInfo: {}
+    })
+
+    const filterDict = (value, options) => {
+        const rowLabel = options.filter(item => item.value == value)
+        return rowLabel && rowLabel[0] && rowLabel[0].label
+    }
+    const getDictFun = async(type) => {
+        const dicts = await getDict(type)
+        return dicts
+    }
+
+    const handleSizeChange = (val) => {
+        tableInfo.pageSize = val
+        getTableData()
+    }
+
+    const handleCurrentChange = (val) => {
+        tableInfo.page = val
+        getTableData()
+    }
+
+    const getTableData = async() => {
+        const res = await listApi({ page: tableInfo.page, pageSize: tableInfo.pageSize, ...tableInfo.searchInfo })
+        if (res.code == 0) {
+            tableInfo.tableData = res.data.list
+            tableInfo.total = res.data.total
+            tableInfo.page = res.data.page
+            tableInfo.pageSize = res.data.pageSize
         }
-    },
-    methods: {
-        filterDict(value, type) {
-            const rowLabel = this[type + "Options"] && this[type + "Options"].filter(item => item.value == value)
-            return rowLabel && rowLabel[0] && rowLabel[0].label
-        },
-        async getDict(type) {
-            const dicts = await getDict(type)
-            this[type + "Options"] = dicts
-            return dicts
-        },
-        handleSizeChange(val) {
-            this.pageSize = val
-            this.getTableData()
-        },
-        handleCurrentChange(val) {
-            this.page = val
-            this.getTableData()
-        },
-        async getTableData(page = this.page, pageSize = this.pageSize) {
-            const table = await this.listApi({ page, pageSize, ...this.searchInfo })
-            if (table.code == 0) {
-                this.tableData = table.data.list
-                this.total = table.data.total
-                this.page = table.data.page
-                this.pageSize = table.data.pageSize
-            }
-        }
+    }
+    return {
+        tableInfo,
+        filterDict,
+        getDictFun,
+        handleSizeChange,
+        handleCurrentChange,
+        getTableData,
     }
 }

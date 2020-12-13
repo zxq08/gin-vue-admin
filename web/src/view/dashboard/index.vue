@@ -2,7 +2,7 @@
   <div class="big">
     <el-row>
       <div class="card">
-        <el-col :xs="24" :lg="16" :md="16" >
+        <el-col :xs="24" :lg="16" :md="16">
           <div class="car-left">
             <el-row>
               <div>
@@ -24,7 +24,7 @@
             </el-row>
           </div>
         </el-col>
-        <el-col :xs="24" :lg='8' :md="8">
+        <el-col :xs="24" :lg="8" :md="8">
           <div class="car-right">
             <el-row>
               <el-col :span="8"
@@ -57,14 +57,35 @@
         </el-col>
       </div>
     </el-row>
-  
+    <el-row>
+      <el-card shadow="hover">
+        <h2>
+          使用教学：<a
+            style="color: #409eff"
+            target="view_window"
+            href="https://www.bilibili.com/video/BV1fV411y7dT/"
+            >https://www.bilibili.com/video/BV1fV411y7dT/</a
+          >
+        </h2>
+        <br />
+        <h2>
+          审批流教学：<a
+            style="color: #409eff"
+            target="view_window"
+            href="https://www.bilibili.com/video/BV1Ka411F7Ji/"
+            >https://www.bilibili.com/video/BV1Ka411F7Ji/</a
+          >
+        </h2>
+        <div></div>
+      </el-card>
+    </el-row>
     <div class="shadow">
       <el-row :gutter="20">
         <el-col
           :span="4"
           v-for="(card, key) in toolCards"
           :key="key"
-          @click.native="toTarget(card.name)"
+          @click="toTarget(card.name)"
           :xs="8"
         >
           <el-card shadow="hover" class="grid-content">
@@ -74,18 +95,6 @@
         </el-col>
       </el-row>
     </div>
-    <el-row>
-      <el-card shadow="hover">
-          <h2>
-            使用教学：<a style="color:#409EFF"  target="view_window" href="https://www.bilibili.com/video/BV1fV411y7dT/">https://www.bilibili.com/video/BV1fV411y7dT/</a>
-          </h2>
-          <br>
-          <h2>
-            审批流教学：<a style="color:#409EFF"  target="view_window" href="https://www.bilibili.com/video/BV1Ka411F7Ji/">https://www.bilibili.com/video/BV1Ka411F7Ji/</a>
-          </h2>
-          <div></div>
-      </el-card>
-    </el-row>
     <div class="bottom">
       <el-row :gutter="32">
         <el-col :xs="24" :sm="24" :lg="12">
@@ -106,12 +115,18 @@
 <script>
 import musicPlayer from "./component/musicPlayer";
 import TodoList from "./component/todoList";
-import { mapGetters } from "vuex";
+import { useStore } from "vuex";
+import { reactive,getCurrentInstance,computed } from "vue";
 export default {
   name: "Dashboard",
-  data() {
-    return {
-      toolCards: [
+  components: {
+    musicPlayer, //音乐播放器
+    TodoList, //TodoList
+  },
+   setup() {
+     const { ctx } = getCurrentInstance()
+     const store = useStore()
+     const toolCards = reactive([
         {
           label: "用户管理",
           icon: "el-icon el-icon-monitor",
@@ -148,24 +163,14 @@ export default {
           name: "about",
           color: "#5cdbd3",
         },
-      ],
-    };
-  },
-  computed: {
-    ...mapGetters("user", ["userInfo"]),
-  },
-  components: {
-    musicPlayer, //音乐播放器
-    TodoList, //TodoList
-    // RaddarChart, //雷达图
-    // stackMap, //堆叠图
-    // Sunburst, //旭日图
-  },
-  methods: {
-    toTarget(name) {
-      this.$router.push({ name });
-    },
-  },
+      ]);
+
+     const toTarget = (name) => {
+      ctx.$router.push({ name });
+    }
+    const userInfo = computed(()=> store.getters["user/userInfo"])
+    return {toolCards , toTarget ,userInfo}
+   },
 };
 </script>
 

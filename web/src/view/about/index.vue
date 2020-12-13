@@ -3,7 +3,9 @@
     <el-row :gutter="10">
       <el-col :span="12">
         <el-card>
-          <div slot="header">gin-vue-admin</div>
+          <template #header>
+            <div>gin-vue-admin</div>
+          </template>
           <div>
             <el-row>
               <el-col :span="8" :offset="8">
@@ -31,20 +33,22 @@
                   <img
                     class="dom-center"
                     src="https://img.shields.io/github/stars/flipped-aurora/gin-vue-admin.svg?style=social"
-                    alt=""/></a
+                    alt="" /></a
               ></el-col>
               <el-col :span="8">
                 <a href="https://github.com/flipped-aurora/gin-vue-admin">
                   <img
                     class="dom-center"
                     src="https://img.shields.io/github/forks/flipped-aurora/gin-vue-admin.svg?label=Fork"
-                    alt=""/></a
+                    alt="" /></a
               ></el-col>
             </el-row>
           </div>
         </el-card>
         <el-card style="margin-top: 20px">
-          <div slot="header">flipped-aurora团队</div>
+          <template #header>
+            <div>flipped-aurora团队</div>
+          </template>
           <div>
             <el-row>
               <el-col :span="8" :offset="8">
@@ -58,37 +62,33 @@
               </el-col>
             </el-row>
             <el-row style="margin-left: 40px" :gutter="20">
-              <template v-for="(item, index) in members">
-                <el-col :span="8" :key="index">
-                  <a :href="item.html_url">
-                    <img class="avatar-img" :src="item.avatar_url" />
-                    <a class="author-name" style="">{{ item.login }}</a>
-                  </a>
-                </el-col>
-              </template>
+              <el-col :span="8" :key="index" v-for="(item, index) in members">
+                <a :href="item.html_url">
+                  <img class="avatar-img" :src="item.avatar_url" />
+                  <a class="author-name" style="">{{ item.login }}</a>
+                </a>
+              </el-col>
             </el-row>
           </div>
         </el-card>
       </el-col>
       <el-col :span="12">
         <el-card>
-          <div slot="header">
-            提交记录
-          </div>
+          <template #header>
+            <div>提交记录</div>
+          </template>
+
           <div>
-            <Timeline
-              :timeline-items="dataTimeline"
-              :message-when-no-items="messageWhenNoItems"
-              :uniqueTimeline="true"
-              :unique-year="true"
-              :show-day-and-month="true"
-              order="desc"
-              dateLocale="zh-CN"
-            />
+             <el-timeline>
+              <el-timeline-item v-for="(item,key) in dataTimeline" :key="key" :timestamp="formatTimeToStr(item.from)" placement="top">
+                <el-card>
+                  <h4>{{item.title}}</h4>
+                  <div style="margin-top:10px" v-html="item.description"></div>
+                </el-card>
+              </el-timeline-item>
+            </el-timeline>
           </div>
-          <el-button class="load-more" @click="loadMore" type="text"
-            >Load more</el-button
-          >
+          <el-button class="load-more" @click="loadMore" type="text">Load more</el-button>
         </el-card>
       </el-col>
     </el-row>
@@ -97,49 +97,55 @@
 
 <script>
 import { Commits, Members } from "@/api/github";
-import Timeline from "timeline-vuejs";
+import {formatTimeToStr} from "@/utils/date.js"
+import { ref, reactive, onMounted } from "vue";
 export default {
-  name: "Test",
-  components: {
-    Timeline,
-  },
-  data() {
-    return {
-      messageWhenNoItems: "There arent commits",
-      members: [],
-      dataTimeline: [],
-      page: 0,
+  name: "About",
+  setup() {
+    // 日志页码
+    const page = ref(0);
+    const loadMore = () => {
+      page.value++;
+      loadCommits();
     };
-  },
-  created() {
-    this.loadCommits();
-    this.loadMembers();
-  },
-  methods: {
-    loadMore() {
-      this.page++;
-      this.loadCommits();
-    },
-    loadCommits() {
-      Commits(this.page).then(({ data }) => {
-        data.forEach((element) => {
-          if (element.commit.message) {
-            this.dataTimeline.push({
-              from: new Date(element.commit.author.date),
-              title: element.commit.author.name,
-              showDayAndMonth: true,
-              description: `<a style="color: #26191b" href="${element.html_url}">${element.commit.message}</a>`,
-            });
-          }
-        });
+
+    // 获取操作日志
+    const dataTimeline = reactive([]);
+    const loadCommits = async () => {
+      const res = await Commits(page.value);
+      res.data.forEach((element) => {
+        if (element.commit.message) {
+          dataTimeline.push({
+            from: new Date(element.commit.author.date),
+            title: element.commit.author.name,
+            description: `<a style="color: #26191b" href="${element.html_url}">${element.commit.message}</a>`,
+          });
+        }
       });
-    },
-    loadMembers() {
-      Members().then(({ data }) => {
-        this.members = data;
-        this.members.sort();
-      });
-    },
+    };
+
+    // 获取开发者列表
+    const members = reactive([]);
+    const loadMembers = async () => {
+      const res = Members();
+      members.value = res.data;
+      members.sort();
+    };
+
+    onMounted(() => {
+      loadCommits();
+      loadMembers();
+    });
+
+    return {
+      page,
+      members,
+      dataTimeline,
+      loadMore,
+      loadCommits,
+      loadMembers,
+      formatTimeToStr
+    };
   },
 };
 </script>
