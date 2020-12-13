@@ -102,7 +102,6 @@ import {
   deleteUser
 } from "@/api/user";
 import { getAuthorityList } from "@/api/authority";
-import { mapGetters } from "vuex";
 import CustomPic from "@/components/customPic";
 import ChooseImg from "@/components/chooseImg";
 import { infoList } from "@/mixins/infoList";
@@ -110,7 +109,7 @@ import { ref, reactive, getCurrentInstance } from "vue";
 export default {
   name: "Api",
   components: { CustomPic, ChooseImg },
-  setup(props) {
+  setup() {
     const { ctx } = getCurrentInstance();
     const {
       tableInfo,
@@ -229,7 +228,8 @@ export default {
       addUser,
       closeAddUserDialog,
       enterAddUserDialog,
-      deleteUserFun
+      deleteUserFun,
+      openHeaderChange
     };
   }
 };

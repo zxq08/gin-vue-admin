@@ -18,9 +18,7 @@
               <el-button @click="deleteVisible = false" size="mini" type="text">取消</el-button>
               <el-button @click="onDelete" size="mini" type="primary">确定</el-button>
             </div>
-            <template #reference>
-              <el-button icon="el-icon-delete" size="mini" type="danger">批量删除</el-button>
-            </template>
+            <el-button icon="el-icon-delete" size="mini" slot="reference" type="danger">批量删除</el-button>
           </el-popover>
         </el-form-item>
       </el-form>
@@ -36,7 +34,7 @@
     >
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column label="日期" width="180">
-        <template #default="scope">{{formatDate(scope.row.CreatedAt)}}</template>
+        <template slot-scope="scope">{{scope.row.CreatedAt|formatDate}}</template>
       </el-table-column>
       <el-table-column label="流程名称" prop="name" width="120"></el-table-column>
 
@@ -47,9 +45,9 @@
       <el-table-column label="流程标题" prop="label" width="120"></el-table-column>
 
       <el-table-column label="是否隐藏图标" prop="hideIcon" width="120">
-        <template #default="scope">
+        <template slot-scope="scope">
           {{
-          formatBoolean(scope.row.hideIcon)
+          scope.row.hideIcon | formatBoolean
           }}
         </template>
       </el-table-column>
@@ -57,7 +55,7 @@
       <el-table-column label="详细介绍" prop="description" width="120"></el-table-column>
 
       <el-table-column label="按钮组">
-        <template #default="scope">
+        <template slot-scope="scope">
           <el-button class="table-button" @click="useWorkflowProcess(scope.row)" size="success" >启动</el-button>
           <el-button class="table-button" @click="updateWorkflowProcess(scope.row)" size="small" type="primary">变更</el-button>
           <el-button class="table-button" @click="viewWorkflowProcess(scope.row)" size="small" type="warning">查看</el-button>
@@ -67,9 +65,7 @@
               <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
               <el-button type="primary" size="mini" @click="deleteWorkflowProcess(scope.row)">确定</el-button>
             </div>
-            <template #reference>
-            <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
-            </template>
+            <el-button type="danger" icon="el-icon-delete" size="mini" slot="reference">删除</el-button>
           </el-popover>
         </template>
       </el-table-column>
@@ -109,8 +105,8 @@ export default {
       multipleSelection: []
     };
   },
-  methods: {
-     formatDate: function(time) {
+  filters: {
+    formatDate: function(time) {
       if (time != null && time != "") {
         var date = new Date(time);
         return formatTimeToStr(date, "yyyy-MM-dd hh:mm:ss");
@@ -124,7 +120,9 @@ export default {
       } else {
         return "";
       }
-    },
+    }
+  },
+  methods: {
     //条件搜索前端看此方法
     onSubmit() {
       this.page = 1;

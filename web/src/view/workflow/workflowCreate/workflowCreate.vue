@@ -27,13 +27,12 @@
           >确定</el-button
         >
       </div>
-            <template #reference>
       <el-button
         size="small"
+        slot="reference"
         style="float: right; margin-top: 6px; margin-right: 6px"
         >保存流程</el-button
       >
-            </template>
     </el-popover>
 
     <gva-wfd
