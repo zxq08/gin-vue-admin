@@ -1,11 +1,8 @@
 <template>
   <div class="big">
-    <el-row>
-      <div class="card">
+    <el-row  class="card">
         <el-col :xs="24" :lg="16" :md="16">
-          <div class="car-left">
-            <el-row>
-              <div>
+            <el-row  class="car-left">
                 <el-col :xs="4" :md="3" :lg="3">
                   <span class="card-img">
                     <img :src="userInfo.headerImg" alt="" />
@@ -20,9 +17,7 @@
                     </p>
                   </div>
                 </el-col>
-              </div>
             </el-row>
-          </div>
         </el-col>
         <el-col :xs="24" :lg="8" :md="8">
           <div class="car-right">
@@ -55,9 +50,9 @@
             </el-row>
           </div>
         </el-col>
-      </div>
     </el-row>
     <el-row>
+     <el-col>
       <el-card shadow="hover">
         <h2>
           使用教学：<a
@@ -78,6 +73,7 @@
         </h2>
         <div></div>
       </el-card>
+     </el-col>
     </el-row>
     <div class="shadow">
       <el-row :gutter="20">

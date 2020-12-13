@@ -16,9 +16,8 @@
             :style="{width: `calc(100% - ${isMobile?'0px':isCollapse?'54px':'220px'})`}"
             class="topfix"
           >
-          <el-row>
             <!-- :xs="8" :sm="6" :md="4" :lg="3" :xl="1" -->
-            <el-header class="header-cont">
+            <el-row class="header-cont" :span="24">
                <el-col :xs="2" :lg="1" :md="1" :sm="1" :xl="1">
                   <div @click="totalCollapse" class="menu-total">
                     <i class="el-icon-s-unfold" v-if="isCollapse"></i>
@@ -58,8 +57,6 @@
                 </el-dropdown>
               </div>
                </el-col>
-
-            </el-header>
           </el-row>
             <!-- 当前面包屑用路由自动生成可根据需求修改 -->
             <!--

@@ -270,10 +270,11 @@
 <script>
 import { getSystemConfig, setSystemConfig } from "@/api/system";
 import { emailTest } from "@/api/email";
-import {reactive} from "vue"
+import {reactive , getCurrentInstance} from "vue"
 export default {
   name: "Config",
-  setup(props,ctx) {
+  setup(props) {
+    const { ctx } = getCurrentInstance();
     const config = reactive({
         system: {},
         jwt: {},
@@ -293,7 +294,6 @@ export default {
         Object.assign(config,res.data.config)
       }
     }
-    
     // 初始化
     initForm()
 

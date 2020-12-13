@@ -992,6 +992,7 @@ li {
     .main-cont.el-main {
         background-color: $bg-main;
         .menu-total {
+            margin-left: 20px;
             font-size: 22px;
             color: #838383;
             margin-top: 16px;
@@ -1149,7 +1150,6 @@ $mainHight: 100vh;
         }
     }
     .header-cont {
-        height: $height-header;
         background: #fff;
     }
     .main-cont {
@@ -1284,6 +1284,7 @@ $mainHight: 100vh;
     padding: 20px;
     border-radius: 4px;
     overflow: hidden;
+    height: 120px;
     .car-left {
         height: $height-car;
         // width: 70%;

@@ -4,8 +4,8 @@
       <el-button @click="relation" class="fl-right" size="small" type="primary">确 定</el-button>
     </div>
     <el-tree
-      :data="menuTreeData"
-      :default-checked-keys="menuTreeIds"
+      :data="menuInfo.menuTreeData"
+      :default-checked-keys="menuInfo.menuTreeIds"
       :props="menuDefaultProps"
       @check="nodeChange"
       default-expand-all
@@ -18,6 +18,7 @@
 </template>
 <script>
 import { getBaseMenuTree, getMenuAuthority, addMenuAuthority } from '@/api/menu'
+import { ref, reactive, getCurrentInstance, onBeforeMount } from "vue";
 
 export default {
   name: 'Menus',
@@ -29,57 +30,68 @@ export default {
       type: Object
     }
   },
-  data() {
-    return {
-      menuTreeData: [],
-      menuTreeIds: [],
-      needConfirm:false,
-      menuDefaultProps: {
+  setup(props) {
+    const { ctx } = getCurrentInstance()
+    const menuInfo = reactive({
+        menuTreeData: [],
+        menuTreeIds: []
+      })
+      const needConfirm = ref(false)
+      const menuDefaultProps = reactive({
         children: 'children',
         label: function(data){
           return data.meta.title
         }
-      }
+      })
+
+
+      const nodeChange = () =>{
+      needConfirm.value = true
     }
-  },
-  methods: {
-    nodeChange(){
-      this.needConfirm = true
-    },
     // 暴露给外层使用的切换拦截统一方法
-    enterAndNext(){
-      this.relation()
-    },
+    const enterAndNext = () => {
+      relation()
+    }
     // 关联树 确认方法
-    async relation() {
-      const checkArr = this.$refs.menuTree.getCheckedNodes(false, true)
+    const relation = async () => {
+      const checkArr = ctx.$refs.menuTree.getCheckedNodes(false, true)
       const res = await addMenuAuthority({
         menus: checkArr,
-        authorityId: this.row.authorityId
+        authorityId: props.row.authorityId
       })
       if (res.code == 0) {
-        this.$message({
+        ctx.$message({
           type: 'success',
           message: '菜单设置成功!'
         })
       }
     }
-  },
-  async created() {
-    // 获取所有菜单树
-    const res = await getBaseMenuTree()
-    this.menuTreeData = res.data.menus
 
-    const res1 = await getMenuAuthority({ authorityId: this.row.authorityId })
-    const menus = res1.data.menus
-    const arr = []
-    menus.map(item => {
-      // 防止直接选中父级造成全选
-      if (!menus.some(same => same.parentId === item.menuId)) {
-        arr.push(Number(item.menuId))
-      }
+    const initMenu = async() => {
+      // 获取所有菜单树
+      const res = await getBaseMenuTree()
+      menuInfo.menuTreeData = res.data.menus
+      const res1 = await getMenuAuthority({ authorityId: props.row.authorityId })
+      const menus = res1.data.menus
+      const arr = []
+      menus.map(item => {
+        // 防止直接选中父级造成全选
+        if (!menus.some(same => same.parentId === item.menuId)) {
+          arr.push(Number(item.menuId))
+        }
+      })
+      menuInfo.menuTreeIds = arr
+    }
+    onBeforeMount(()=>{
+      initMenu()
     })
-    this.menuTreeIds = arr
+    return {
+      menuInfo,
+      menuDefaultProps,
+      nodeChange,
+      enterAndNext,
+      relation
+    }
   }
 }
 </script>

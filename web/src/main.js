@@ -11,16 +11,6 @@ import '@/permission'
 import { store } from '@/store/index'
 
 
-// 富文本插件
-import VueQuillEditor from 'vue-quill-editor'
-import 'quill/dist/quill.core.css'
-import 'quill/dist/quill.snow.css'
-import 'quill/dist/quill.bubble.css'
-
-// markdown插件
-import mavonEditor from 'mavon-editor'
-import 'mavon-editor/dist/css/index.css'
-
 console.log(`
        欢迎使用 Gin-Vue-Admin
        当前版本:V2.3.8
@@ -32,7 +22,5 @@ export default
 createApp(App)
     .use(store)
     .use(router)
-    .use(VueQuillEditor)
-    .use(mavonEditor)
     .use(ElementPlus)
     .mount('#app')
