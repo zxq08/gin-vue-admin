@@ -21,6 +21,7 @@ func InitMysqlData(db *gorm.DB) {
 	InitSysDataAuthorityId(db)
 	InitSysDictionaryDetail(db)
 	InitExaFileUploadAndDownload(db)
+	InitWkProcess(db)
 }
 
 func InitMysqlTables(db *gorm.DB) {
@@ -43,6 +44,11 @@ func InitMysqlTables(db *gorm.DB) {
 		model.SysDictionaryDetail{},
 		model.SysBaseMenuParameter{},
 		model.ExaFileUploadAndDownload{},
+		model.WorkflowProcess{},
+		model.WorkflowNode{},
+		model.WorkflowEdge{},
+		model.WorkflowStartPoint{},
+		model.WorkflowEndPoint{},
 	)
 	if err != nil {
 		color.Warn.Printf("[Mysql]-->初始化数据表失败,err: %v\n", err)
