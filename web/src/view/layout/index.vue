@@ -66,16 +66,12 @@
         </transition>
 
         <router-view v-slot="{ Component }" v-loading="loadingFlag"  element-loading-text="正在加载中" class="admin-box" v-if="$route.meta.keepAlive">
-        <transition mode="out-in" name="el-fade-in-linear">
           <keep-alive>
             <component :is="Component" />
           </keep-alive>
-        </transition>
         </router-view>
         <router-view v-slot="{ Component }" v-loading="loadingFlag"  element-loading-text="正在加载中" class="admin-box" v-if="!$route.meta.keepAlive">
-          <transition mode="out-in" name="el-fade-in-linear">
             <component :is="Component" />
-          </transition>
         </router-view>
        <BottomInfo />
       </el-main>

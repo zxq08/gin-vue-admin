@@ -5,7 +5,7 @@
     </div>
 
     <!-- 由于此处菜单跟左侧列表一一对应所以不需要分页 pageSize默认999 -->
-    <el-table :data="tableData" border row-key="ID" stripe>
+    <el-table :data="tableInfo.tableData" border row-key="ID" stripe>
       <el-table-column label="ID" min-width="100" prop="ID"></el-table-column>
       <el-table-column label="路由Name" min-width="160" prop="name"></el-table-column>
       <el-table-column label="路由Path" min-width="160" prop="path"></el-table-column>
@@ -71,10 +71,10 @@
         </el-form-item>
         <el-form-item prop="path" style="width:30%">
           <template #label>
-          <div style="display:inline-block">
-            路由path
-            <el-checkbox style="float:right;margin-left:20px;" v-model="checkFlag">添加参数</el-checkbox>
-          </div>
+            <div style="display:inline-block">
+              路由path
+              <el-checkbox style="float:right;margin-left:20px;" v-model="checkFlag">添加参数</el-checkbox>
+            </div>
           </template>
           <el-input
             :disabled="!checkFlag"
@@ -166,10 +166,10 @@
         </el-table>
       </div>
       <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="closeDialog">取 消</el-button>
-        <el-button @click="enterDialog" type="primary">确 定</el-button>
-      </div>
+        <div class="dialog-footer">
+          <el-button @click="closeDialog">取 消</el-button>
+          <el-button @click="enterDialog" type="primary">确 定</el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -185,130 +185,119 @@ import {
   deleteBaseMenu,
   getBaseMenuById
 } from "@/api/menu";
-import infoList from "@/mixins/infoList";
+import { infoList } from "@/mixins/infoList";
 import icon from "@/view/superAdmin/menu/icon";
+import { ref, reactive, getCurrentInstance } from "vue";
+import { assign } from "@antv/util";
+
 export default {
   name: "Menus",
-  mixins: [infoList],
-  data() {
-    return {
-      checkFlag: false,
-      listApi: getMenuList,
-      dialogFormVisible: false,
-      dialogTitle: "新增菜单",
-      menuOption: [
-        {
-          ID: "0",
-          title: "根菜单"
-        }
-      ],
-      form: {
-        ID: 0,
-        path: "",
-        name: "",
-        hidden: "",
-        parentId: "",
-        component: "",
-        meta: {
-          title: "",
-          icon: "",
-          defaultMenu: false,
-          keepAlive: false
-        },
-        parameters: []
-      },
-      rules: {
-        path: [{ required: true, message: "请输入菜单name", trigger: "blur" }],
-        component: [
-          { required: true, message: "请输入文件路径", trigger: "blur" }
-        ],
-        "meta.title": [
-          { required: true, message: "请输入菜单展示名称", trigger: "blur" }
-        ]
-      },
-      isEdit: false,
-      test: ""
-    };
-  },
   components: {
     icon
   },
-  methods: {
-    addParameter(form) {
-      if (!form.parameters){
-        this.$set(form,"parameters",[])
+  setup(props) {
+    const { ctx } = getCurrentInstance();
+    const {
+      tableInfo,
+      handleSizeChange,
+      handleCurrentChange,
+      getTableData
+    } = infoList(getMenuList);
+    const checkFlag = ref(false);
+    const dialogFormVisible = ref(false);
+    const isEdit = ref(false);
+    const dialogTitle = ref("新增菜单");
+    const menuOption = reactive([
+      {
+        ID: "0",
+        title: "根菜单"
+      }
+    ]);
+    const form = reactive({
+      ID: 0,
+      path: "",
+      name: "",
+      hidden: "",
+      parentId: "",
+      component: "",
+      meta: {
+        title: "",
+        icon: "",
+        defaultMenu: false,
+        keepAlive: false
+      },
+      parameters: []
+    });
+    const rules = reactive({
+      path: [{ required: true, message: "请输入菜单name", trigger: "blur" }],
+      component: [
+        { required: true, message: "请输入文件路径", trigger: "blur" }
+      ],
+      "meta.title": [
+        { required: true, message: "请输入菜单展示名称", trigger: "blur" }
+      ]
+    });
+
+    const addParameter = form => {
+      if (!form.parameters) {
+        form.parameters = []
       }
       form.parameters.push({
         type: "query",
         key: "",
         value: ""
       });
-    },
-    deleteParameter(parameters, index) {
+    };
+
+    const deleteParameter = (parameters, index) => {
       parameters.splice(index, 1);
-    },
-    changeName() {
-      this.form.path = this.form.name;
-    },
-    setOptions() {
-      this.menuOption = [
-        {
-          ID: "0",
-          title: "根目录"
-        }
-      ];
-      this.setMenuOptions(this.tableData, this.menuOption, false);
-    },
-    setMenuOptions(menuData, optionsData, disabled) {
+    };
+    const changeName = () => {
+      form.path = form.name;
+    };
+    const setOptions = () => {
+      menuOption.length = 0;
+      menuOption.push({
+        ID: "0",
+        title: "根目录"
+      });
+
+      setMenuOptions(tableInfo.tableData, menuOption, false);
+    };
+    const setMenuOptions = (menuData, optionsData, disabled) => {
       menuData &&
         menuData.map(item => {
           if (item.children && item.children.length) {
             const option = {
               title: item.meta.title,
               ID: String(item.ID),
-              disabled: disabled || item.ID == this.form.ID,
+              disabled: disabled || item.ID == form.ID,
               children: []
             };
-            this.setMenuOptions(
+            setMenuOptions(
               item.children,
               option.children,
-              disabled || item.ID == this.form.ID
+              disabled || item.ID == form.ID
             );
             optionsData.push(option);
           } else {
             const option = {
               title: item.meta.title,
               ID: String(item.ID),
-              disabled: disabled || item.ID == this.form.ID
+              disabled: disabled || item.ID == form.ID
             };
             optionsData.push(option);
           }
         });
-    },
-    handleClose(done) {
-      this.initForm();
+    };
+    const handleClose = done => {
+      initForm();
       done();
-    },
-    // 懒加载子菜单
-    load(tree, treeNode, resolve) {
-      resolve([
-        {
-          id: 31,
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄"
-        },
-        {
-          id: 32,
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄"
-        }
-      ]);
-    },
+    };
+
     // 删除菜单
-    deleteMenu(ID) {
-      this.$confirm("此操作将永久删除所有角色下该菜单, 是否继续?", "提示", {
+    const deleteMenu = ID => {
+      ctx.$confirm("此操作将永久删除所有角色下该菜单, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
@@ -316,25 +305,25 @@ export default {
         .then(async () => {
           const res = await deleteBaseMenu({ ID });
           if (res.code == 0) {
-            this.$message({
+            ctx.$message({
               type: "success",
               message: "删除成功!"
             });
-            this.getTableData();
+            getTableData();
           }
         })
         .catch(() => {
-          this.$message({
+          ctx.$message({
             type: "info",
             message: "已取消删除"
           });
         });
-    },
+    };
     // 初始化弹窗内表格方法
-    initForm() {
-      this.checkFlag = false;
-      this.$refs.menuForm.resetFields();
-      this.form = {
+    const initForm = () => {
+      checkFlag.value = false;
+      ctx.$refs.menuForm.resetFields();
+      Object.assign(form, {
         ID: 0,
         path: "",
         name: "",
@@ -347,57 +336,80 @@ export default {
           defaultMenu: false,
           keepAlive: ""
         }
-      };
-    },
+      });
+    };
     // 关闭弹窗
-    closeDialog() {
-      this.initForm();
-      this.dialogFormVisible = false;
-    },
+    const closeDialog = () => {
+      initForm();
+      dialogFormVisible.value = false;
+    };
     // 添加menu
-    async enterDialog() {
-      this.$refs.menuForm.validate(async valid => {
+    const enterDialog = async () => {
+      ctx.$refs.menuForm.validate(async valid => {
         if (valid) {
           let res;
-          if (this.isEdit) {
-            res = await updateBaseMenu(this.form);
+          if (isEdit.value) {
+            res = await updateBaseMenu(form);
           } else {
-            res = await addBaseMenu(this.form);
+            res = await addBaseMenu(form);
           }
           if (res.code == 0) {
-            this.$message({
+            ctx.$message({
               type: "success",
-              message: this.isEdit ? "编辑成功" : "添加成功!"
+              message: isEdit.value ? "编辑成功" : "添加成功!"
             });
-            this.getTableData();
+            getTableData();
           }
-          this.initForm();
-          this.dialogFormVisible = false;
+          initForm();
+          dialogFormVisible.value = false;
         }
       });
-    },
+    };
     // 添加菜单方法，id为 0则为添加根菜单
-    addMenu(id) {
-      this.dialogTitle = "新增菜单";
-      this.form.parentId = String(id);
-      this.isEdit = false;
-      this.setOptions();
-      this.dialogFormVisible = true;
-    },
+    const addMenu = id => {
+      dialogTitle.value = "新增菜单";
+      form.parentId = String(id);
+      isEdit.value = false;
+      setOptions();
+      dialogFormVisible.value = true;
+    };
     // 修改菜单方法
-    async editMenu(id) {
-      this.dialogTitle = "编辑菜单";
+    const editMenu = async id => {
+      dialogTitle.value = "编辑菜单";
       const res = await getBaseMenuById({ id });
-      this.form = res.data.menu;
-      this.isEdit = true;
-      this.setOptions();
-      this.dialogFormVisible = true;
-    }
+      Object.assign(form, res.data.menu);
+      isEdit.value = true;
+      setOptions();
+      dialogFormVisible.value = true;
+    };
+
+
+    tableInfo.pageSize = 999;
+    getTableData();
+    return {
+      tableInfo,
+      handleSizeChange,
+      handleCurrentChange,
+      checkFlag,
+      dialogFormVisible,
+      dialogTitle,
+      menuOption,
+      form,
+      rules,
+      isEdit,
+      deleteParameter,
+      setMenuOptions,
+      handleClose,
+      deleteMenu,
+      closeDialog,
+      enterDialog,
+      addMenu,
+      editMenu,
+      changeName,
+      addParameter
+    };
   },
-  async created() {
-    this.pageSize = 999;
-    await this.getTableData();
-  }
+
 };
 </script>
 <style scoped lang="scss">
