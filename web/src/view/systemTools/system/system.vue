@@ -270,11 +270,11 @@
 <script>
 import { getSystemConfig, setSystemConfig } from "@/api/system";
 import { emailTest } from "@/api/email";
+import {reactive} from "vue"
 export default {
   name: "Config",
-  data() {
-    return {
-      config: {
+  setup(props,ctx) {
+    const config = reactive({
         system: {},
         jwt: {},
         casbin: {},
@@ -286,46 +286,53 @@ export default {
         zap: {},
         local: {},
         email: {}
-      }
-    };
-  },
-  async created() {
-    await this.initForm();
-  },
-  methods: {
-    async initForm() {
+      })
+    const initForm = async() => {
       const res = await getSystemConfig();
       if (res.code == 0) {
-        this.config = res.data.config;
+        Object.assign(config,res.data.config)
       }
-    },
-    reload() {},
-    async update() {
-      const res = await setSystemConfig({ config: this.config });
-      if (res.code == 0) {
-        this.$message({
-          type: "success",
-          message: "配置文件设置成功"
-        });
-        await this.initForm();
-      }
-    },
-    async email() {
+    }
+    
+    // 初始化
+    initForm()
+
+    const email = async () => {
       const res = await emailTest();
       if (res.code == 0) {
-        this.$message({
+        ctx.$message({
           type: "success",
           message: "邮件发送成功"
         });
-        await this.initForm();
+        await initForm();
       } else {
-        this.$message({
+        ctx.$message({
           type: "error",
           message: "邮件发送失败"
         });
       }
     }
-  }
+    
+    
+     const  update = async() => {
+      const res = await setSystemConfig({ config });
+      if (res.code == 0) {
+        ctx.$message({
+          type: "success",
+          message: "配置文件设置成功"
+        });
+        await initForm();
+      }
+    }
+    const reload = () => {}
+    return {
+      config,
+      email,
+      update,
+      initForm,
+      reload
+    }
+  },
 };
 </script>
 <style lang="scss">

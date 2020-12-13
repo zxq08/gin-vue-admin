@@ -5,14 +5,8 @@
 </template>
 
 <script>
-var path = process.env.VUE_APP_BASE_API
 export default {
     name:"FormGenerator",
-    data(){
-      return{
-        basePath:path
-      }
-    },
 };
 </script>
 
