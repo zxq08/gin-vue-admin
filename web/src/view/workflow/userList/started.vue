@@ -24,7 +24,7 @@
         width="120"
       ></el-table-column>
       <el-table-column label="节点日期" width="180">
-        <template slot-scope="scope">{{
+        <template #default="scope">{{
           scope.row.CreatedAt | formatDate
         }}</template>
       </el-table-column>
@@ -43,7 +43,7 @@
          label="流程状态"
         width="120"
         >
-            <template slot-scope="scope">
+            <template #default="scope">
                 <div>
                     {{scope.row.isActive?"进行中":"已结束"}}
                 </div>
@@ -55,7 +55,7 @@
         min-width="200"
       ></el-table-column>
       <el-table-column label="按钮组">
-        <template slot-scope="scope">
+        <template #default="scope">
             <el-button @click="view(scope.row)">查看</el-button>
         </template>
       </el-table-column>
