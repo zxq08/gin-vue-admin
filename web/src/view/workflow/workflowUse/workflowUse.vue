@@ -1,19 +1,25 @@
 <template>
   <div class="workflow-use">
-    <div style="padding:10px 20px">
+    <div style="padding: 10px 20px">
       <el-steps
-        :active="moves.length-1"
+        :active="moves.length - 1"
         :process-status="processStatus"
         finish-status="finish"
         align-center
       >
         <el-step v-for="(item, key) in moves" :key="key">
-          <div slot="title">{{ item.workflowNode.label }}</div>
-          <div slot="description">
-            <div>节点说明:{{ item.workflowNode.description }}</div>
-            <div v-if="item.operator.nickName">操作人:{{ item.operator.nickName }}</div>
-            <div>操作参数:{{ item.param||'无参数' }}</div>
-          </div>
+          <template #title>
+            <div>
+              {{ item.workflowNode.label }}
+            </div>
+          </template>
+          <template #description>
+            <div>
+              <div>节点说明:{{ item.workflowNode.description }}</div>
+              <div v-if="item.operator.nickName">操作人:{{ item.operator.nickName }}</div>
+              <div>操作参数:{{ item.param || "无参数" }}</div>
+            </div>
+          </template>
         </el-step>
       </el-steps>
     </div>
@@ -27,10 +33,7 @@
   </div>
 </template>
 <script>
-import {
-  findWorkflowStep,
-  getWorkflowMoveByID
-} from "@/api/workflowProcess.js";
+import { findWorkflowStep, getWorkflowMoveByID } from "@/api/workflowProcess.js";
 import { ref, reactive, getCurrentInstance, computed, createTextVNode } from "vue";
 import { useRoute } from "vue-router";
 export default {
@@ -58,7 +61,7 @@ export default {
         return "process";
       }
     });
-    
+
     const createDone = async () => {
       let path = "";
       if (node.view) {
@@ -66,9 +69,9 @@ export default {
       } else {
         path = workflow.view;
       }
-      const compent = await import("@/"+path)
-      appContext.components.WorkflowInfo = compent.default
-      console.log(appContext.components)
+      const compent = await import("@/" + path);
+      appContext.components.WorkflowInfo = compent.default;
+      console.log(appContext.components);
       done.value = true;
     };
     const initWFU = async () => {
@@ -90,7 +93,6 @@ export default {
           Object.assign(move, res.data.move);
           Object.assign(moves, res.data.moves);
           createDone();
-          
         }
       }
     };
@@ -102,8 +104,8 @@ export default {
       moves,
       move,
       processStatus,
-      createDone
-    }
+      createDone,
+    };
   },
 };
 </script>

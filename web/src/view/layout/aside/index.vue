@@ -22,20 +22,25 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from "vuex";
+import { useStore } from "vuex";
 import AsideComponent from "@/view/layout/aside/asideComponent";
 import { emitter } from '@/utils/mitt'
+import { computed, ref ,watch,onUnmounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 export default {
   name: "Aside",
-  data() {
-    return {
-      active: "",
-      isCollapse: false
-    };
+  components: {
+    AsideComponent
   },
-  methods: {
-    ...mapMutations("history", ["addHistory"]),
-    selectMenuItem(index, _, ele) {
+  setup(){
+    const store = useStore()
+    const router = useRouter()
+    const route = useRoute()
+    const active = ref("")
+    const isCollapse = ref(false)
+    const addHistory = () => store.commit('history/addHistory')
+    const asyncRouters = computed(()=>store.getters["router/asyncRouters"])
+    const selectMenuItem = (index, _, ele) => {
       const query = {};
       const params = {};
       ele.route.parameters &&
@@ -46,40 +51,30 @@ export default {
             params[item.key] = item.value;
           }
         });
-      if (index === this.$route.name) return;
+      if (index === route.name) return;
       if (index.indexOf("http://") > -1 || index.indexOf("https://") > -1) {
         window.open(index);
       } else {
-        this.active = index
-        this.$router.push({ name: index, query, params });
+        active.value = index
+        router.push({ name: index, query, params });
       }
     }
-  },
-  computed: {
-    ...mapGetters("router", ["asyncRouters"])
-  },
-  components: {
-    AsideComponent
-  },
-  created() {
-    this.active = this.$route.name;
-    let screenWidth = document.body.clientWidth;
-    if (screenWidth < 1000) {
-      this.isCollapse = !this.isCollapse;
-    }
 
-    emitter.on("collapse", item => {
-      this.isCollapse = item;
-    });
-  },
-  watch: {
-    $route() {
-      this.active = this.$route.name;
+    watch(route, () => {
+      active.value = route.name;
+    })
+
+    onUnmounted(() => {
+      emitter.off("collapse")
+    })
+    return{
+      active,
+      isCollapse,
+      addHistory,
+      selectMenuItem,
+      asyncRouters
     }
   },
-  beforeUnmount() {
-    emitter.off("collapse");
-  }
 };
 </script>
 

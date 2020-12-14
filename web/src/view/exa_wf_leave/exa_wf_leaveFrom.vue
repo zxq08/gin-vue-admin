@@ -6,16 +6,32 @@
       </el-form-item>
 
       <el-form-item label="开始时间:">
-        <el-date-picker type="date" placeholder="选择日期" v-model="formData.startTime" clearable></el-date-picker>
+        <el-date-picker
+          type="date"
+          placeholder="选择日期"
+          v-model="formData.startTime"
+          clearable
+        ></el-date-picker>
       </el-form-item>
 
       <el-form-item label="结束时间:">
-        <el-date-picker type="date" placeholder="选择日期" v-model="formData.endTime" clearable></el-date-picker>
+        <el-date-picker
+          type="date"
+          placeholder="选择日期"
+          v-model="formData.endTime"
+          clearable
+        ></el-date-picker>
       </el-form-item>
       <el-form-item>
-        <el-button v-if="this.wf.clazz == 'start'" @click="start" type="primary">启动</el-button>
-        <el-button v-if="this.wf.clazz == 'userTask'" @click="complete('yes')" type="primary">同意</el-button>
-        <el-button v-if="this.wf.clazz == 'userTask'" @click="complete('no')" type="primary">拒绝</el-button>
+        <el-button v-if="wf.clazz == 'start'" @click="start" type="primary"
+          >启动</el-button
+        >
+        <el-button v-if="wf.clazz == 'userTask'" @click="complete('yes')" type="primary"
+          >同意</el-button
+        >
+        <el-button v-if="wf.clazz == 'userTask'" @click="complete('no')" type="primary"
+          >拒绝</el-button
+        >
         <el-button @click="back" type="primary">返回</el-button>
       </el-form-item>
     </el-form>
@@ -24,117 +40,121 @@
 
 <script>
 import { startWorkflow, completeWorkflowMove } from "@/api/workflowProcess";
-import infoList from "@/mixins/infoList";
 import { mapGetters } from "vuex";
+import { ref, reactive, getCurrentInstance,computed } from "vue";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 export default {
   name: "ExaWfLeave",
-  mixins: [infoList],
   props: {
     business: {
       type: Object,
-      default: function() {
+      default: function () {
         return null;
-      }
+      },
     },
     wf: {
       type: Object,
-      default: function() {
+      default: function () {
         return {};
-      }
+      },
     },
     workflowMoveID: {
       type: Number,
-      default: 0
-    }
+      default: 0,
+    },
   },
-  data() {
-    return {
-      formData: {
-        cause: "",
-        startTime: new Date(),
-        endTime: new Date()
-      }
-    };
-  },
-  computed: {
-    canShow() {
-      if (this.wf.assignType == "user") {
-        if (this.wf.assginValue.indexOf("," + this.userInfo.ID + ",") > 0) {
+  setup(props) {
+    const { ctx } = getCurrentInstance();
+    const store = useStore();
+    const router = useRouter();
+    const formData = reactive({
+      ID: 0,
+      cause: "",
+      startTime: new Date(),
+      endTime: new Date(),
+    });
+
+    const canShow = computed(() => {
+      if (props.wf.assignType == "user") {
+        if (props.wf.assginValue.indexOf("," + userInfo.ID + ",") > 0) {
           return true;
         } else {
           return false;
         }
-      } else if (this.wf.assign_type == "authority") {
-        if (
-          this.wf.assginValue.indexOf("," + this.userInfo.authorityId + ",") > 0
-        ) {
+      } else if (props.wf.assign_type == "authority") {
+        if (props.wf.assginValue.indexOf("," + userInfo.authorityId + ",") > 0) {
           return true;
         } else {
           return false;
         }
       }
       return true;
-    },
-    ...mapGetters("user", ["userInfo"])
-  },
-  methods: {
-    async start() {
+    });
+    const userInfo = computed(() => store.getters["user/userInfo"]);
+    const start = async () => {
       const res = await startWorkflow({
-        business: this.formData,
+        business: formData,
         wf: {
-          workflowMoveID: this.workflowMoveID,
+          workflowMoveID: props.workflowMoveID,
           businessId: 0,
           businessType: "leave",
-          workflowProcessID: this.wf.workflowProcessID,
-          workflowNodeID: this.wf.id,
-          promoterID: this.userInfo.ID,
-          operatorID: this.userInfo.ID,
+          workflowProcessID: props.wf.workflowProcessID,
+          workflowNodeID: props.wf.id,
+          promoterID: userInfo.ID,
+          operatorID: userInfo.ID,
           action: "create",
-          param: ""
-        }
+          param: "",
+        },
       });
       if (res.code == 0) {
-        this.$message({
+        ctx.$message({
           type: "success",
-          message: "启动成功"
+          message: "启动成功",
         });
-        this.back();
+        back();
       }
-    },
-    async complete(param) {
+    };
+    const complete = async (param) => {
       const res = await completeWorkflowMove({
-        business: this.formData,
+        business: formData,
         wf: {
-          workflowMoveID: this.workflowMoveID,
-          businessID: this.formData.ID,
+          workflowMoveID: props.workflowMoveID,
+          businessID: formData.ID,
           businessType: "leave",
-          workflowProcessID: this.wf.workflowProcessID,
-          workflowNodeID: this.wf.id,
-          promoterID: this.userInfo.ID,
-          operatorID: this.userInfo.ID,
+          workflowProcessID: props.wf.workflowProcessID,
+          workflowNodeID: props.wf.id,
+          promoterID: userInfo.ID,
+          operatorID: userInfo.ID,
           action: "complete",
-          param: param
-        }
+          param: param,
+        },
       });
       if (res.code == 0) {
-        this.$message({
+        ctx.$message({
           type: "success",
-          message: "提交成功"
+          message: "提交成功",
         });
-        this.back();
+        back();
       }
-    },
-    back() {
-      this.$router.go(-1);
+    };
+    const back = () => {
+      router.go(-1);
+    };
+
+    if (props.business) {
+      Object.assign(formData, props.business);
     }
+    return {
+      formData,
+      canShow,
+      userInfo,
+      start,
+      complete,
+      back,
+    };
   },
-  async created() {
-    if (this.business) {
-      this.formData = this.business;
-    }
-  }
 };
 </script>
 
-<style>
-</style>
+<style></style>

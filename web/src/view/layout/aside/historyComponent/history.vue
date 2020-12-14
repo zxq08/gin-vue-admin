@@ -1,7 +1,7 @@
 <template>
   <div class="router-history">
     <el-tabs
-      :closable="!(historys.length==1&&this.$route.name=='dashboard')"
+      :closable="!(historys.length == 1 && this.$route.name == 'dashboard')"
       @contextmenu.prevent="openContextMenu($event)"
       @tab-click="changeTab"
       @tab-remove="removeTab"
@@ -18,7 +18,11 @@
     </el-tabs>
 
     <!--自定义右键菜单html代码-->
-    <ul :style="{left:left+'px',top:top+'px'}" class="contextmenu" v-show="contextMenuVisible">
+    <ul
+      :style="{ left: left + 'px', top: top + 'px' }"
+      class="contextmenu"
+      v-show="contextMenuVisible"
+    >
       <li @click="closeAll">关闭所有</li>
       <li @click="closeLeft">关闭左侧</li>
       <li @click="closeRight">关闭右侧</li>
@@ -27,180 +31,205 @@
   </div>
 </template>
 <script>
-import { emitter } from '@/utils/mitt'
+import { emitter } from "@/utils/mitt";
+import { onUnmounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 export default {
-  name: 'HistoryComponent',
-  data() {
-    return {
-      historys: [],
-      activeValue: 'dashboard',
-      contextMenuVisible: false,
-      left: 0,
-      top: 0,
-      isCollapse: false,
-      isMobile: false,
-      rightActive: ''
-    }
-  },
-  created() {
-    emitter.on('mobile', isMobile => {
-      this.isMobile = isMobile
-    })
-    emitter.on('collapse', isCollapse => {
-      this.isCollapse = isCollapse
-    })
-    const initHistorys = [
-      {
-        name: 'dashboard',
-        meta: {
-          title: '仪表盘'
-        }
-      }
-    ]
-    this.historys =
-      JSON.parse(sessionStorage.getItem('historys')) || initHistorys
-    this.setTab(this.$route)
-  },
+  name: "HistoryComponent",
+  setup() {
+    const route = useRoute();
+    const router = useRouter();
+    const historys = reactive([]);
+    const activeValue = ref("dashboard");
+    const contextMenuVisible = ref(false);
+    const left = ref(0);
+    const top = ref(0);
+    const isCollapse = ref(false);
+    const isMobile = ref(false);
+    const rightActive = ref("");
 
-  beforeUnmount() {
-    emitter.off('collapse')
-    emitter.off('mobile')
-  },
-  methods: {
-    openContextMenu(e) {
-      if (this.historys.length == 1 && this.$route.name == 'dashboard') {
-        return false
+    const openContextMenu = (e) => {
+      if (historys.length == 1 && route.name == "dashboard") {
+        return false;
       }
       if (e.srcElement.id) {
-        this.contextMenuVisible = true
-        let width
-        if (this.isCollapse) {
-          width = 54
+        contextMenuVisible.value = true;
+        let width;
+        if (isCollapse.value) {
+          width = 54;
         } else {
-          width = 220
+          width = 220;
         }
-        if (this.isMobile) {
-          width = 0
+        if (isMobile.value) {
+          width = 0;
         }
-        this.left = e.clientX - width
-        this.top = e.clientY + 10
-        this.rightActive = e.srcElement.id.split('-')[1]
+        left.value = e.clientX - width;
+        top.value = e.clientY + 10;
+        rightActive.value = e.srcElement.id.split("-")[1];
       }
-    },
-    closeAll() {
-      this.historys = [
-        {
-          name: 'dashboard',
-          meta: {
-            title: '仪表盘'
-          }
+    };
+    const closeAll = () => {
+      historys.length = 0;
+      historys.push({
+        name: "dashboard",
+        meta: {
+          title: "仪表盘",
+        },
+      });
+      router.push({ name: "dashboard" });
+      contextMenuVisible.value = false;
+      sessionStorage.setItem("historys", JSON.stringify(historys));
+    };
+    const closeLeft = () => {
+      let right;
+      const rightIndex = historys.findIndex((item) => {
+        if (item.name == rightActive.value) {
+          right = item;
         }
-      ]
-      this.$router.push({ name: 'dashboard' })
-      this.contextMenuVisible = false
-      sessionStorage.setItem('historys', JSON.stringify(this.historys))
-    },
-    closeLeft() {
-      let right
-      const rightIndex = this.historys.findIndex(
-        item => {
-          if(item.name == this.rightActive){
-            right = item
-          }
-          return item.name == this.rightActive
-        }
-      )
-      const activeIndex = this.historys.findIndex(
-        item => item.name == this.activeValue
-      )
-      this.historys.splice(0, rightIndex)
+        return item.name == rightActive.value;
+      });
+      const activeIndex = historys.findIndex((item) => item.name == activeValue.value);
+      historys.splice(0, rightIndex);
       if (rightIndex > activeIndex) {
-        this.$router.push(right)
+        router.push(right);
       }
-      sessionStorage.setItem('historys', JSON.stringify(this.historys))
-    },
-    closeRight() {
-      let right
-      const leftIndex = this.historys.findIndex(
-        item => {
-          if(item.name == this.rightActive){
-            right = item
-          }
-          return item.name == this.rightActive
+      sessionStorage.setItem("historys", JSON.stringify(historys));
+    };
+    const closeRight = () => {
+      let right;
+      const leftIndex = historys.findIndex((item) => {
+        if (item.name == rightActive.value) {
+          right = item;
         }
-      )
-      const activeIndex = this.historys.findIndex(
-        item => item.name == this.activeValue
-      )
-      this.historys.splice(leftIndex + 1, this.historys.length)
+        return item.name == rightActive.value;
+      });
+      const activeIndex = historys.findIndex((item) => item.name == activeValue.value);
+      historys.splice(leftIndex + 1, historys.length);
       if (leftIndex < activeIndex) {
-        this.$router.push(right)
+        router.push(right);
       }
-      sessionStorage.setItem('historys', JSON.stringify(this.historys))
-    },
-    closeOther() {
-      let right
-      this.historys = this.historys.filter(
-        item => {
-          if(item.name == this.rightActive){
-            right = item
-          }
-          return item.name == this.rightActive
+      sessionStorage.setItem("historys", JSON.stringify(historys));
+    };
+    const closeOther = () => {
+      let right;
+      historys.length = 0;
+      const bkHistory = historys.filter((item) => {
+        if (item.name == this.rightActive) {
+          right = item;
         }
-      )
-      this.$router.push(right)
-      sessionStorage.setItem('historys', JSON.stringify(this.historys))
-    },
-    setTab(route) {
-      if (!this.historys.some(item => item.name == route.name)) {
-        const obj = {}
-        obj.name = route.name
-        obj.meta = route.meta
-        obj.query = route.query
-        obj.params = route.params
-        this.historys.push(obj)
+        return item.name == this.rightActive;
+      });
+      Object.assign(historys, bkHistory);
+      router.push(right);
+      sessionStorage.setItem("historys", JSON.stringify(historys));
+    };
+    const setTab = (route) => {
+      if (!historys.some((item) => item.name == route.name)) {
+        const obj = {};
+        obj.name = route.name;
+        obj.meta = route.meta;
+        obj.query = route.query;
+        obj.params = route.params;
+        historys.push(obj);
       }
-      this.activeValue = this.$route.name
-    },
-    changeTab(component) {
-      const tab = component.instance.attrs.tab
-      this.$router.push({ name: tab.name,query:tab.query,params:tab.params })
-    },
-    removeTab(tab) {
-      const index = this.historys.findIndex(item => item.name == tab)
-      if (this.$route.name == tab) {
-        if (this.historys.length == 1) {
-          this.$router.push({ name: 'dashboard' })
+      activeValue.value = route.name;
+    };
+    const changeTab = (component) => {
+      const tab = component.instance.attrs.tab;
+      router.push({ name: tab.name, query: tab.query, params: tab.params });
+    };
+    const removeTab = (tab) => {
+      const index = historys.findIndex((item) => item.name == tab);
+      if (route.name == tab) {
+        if (historys.length == 1) {
+          router.push({ name: "dashboard" });
         } else {
-          if (index < this.historys.length - 1) {
-            this.$router.push({ name: this.historys[index + 1].name,query:this.historys[index + 1].query,params:this.historys[index + 1].params })
+          if (index < historys.length - 1) {
+            router.push({
+              name: historys[index + 1].name,
+              query: historys[index + 1].query,
+              params: historys[index + 1].params,
+            });
           } else {
-            this.$router.push({ name: this.historys[index - 1].name,query:this.historys[index - 1].query,params:this.historys[index - 1].params })
+            router.push({
+              name: historys[index - 1].name,
+              query: historys[index - 1].query,
+              params: historys[index - 1].params,
+            });
           }
         }
       }
-      this.historys.splice(index, 1)
-    }
-  },
-  watch: {
-    contextMenuVisible() {
-      if (this.contextMenuVisible) {
-        document.body.addEventListener('click', () => {
-          this.contextMenuVisible = false
-        })
+      historys.splice(index, 1);
+    };
+
+    const initFun = () => {
+      emitter.on("mobile", (isMobileParams) => {
+        isMobile.value = isMobileParams;
+      });
+      emitter.on("collapse", (isCollapseParams) => {
+        isCollapse.value = isCollapseParams;
+      });
+      const initHistorys = [
+        {
+          name: "dashboard",
+          meta: {
+            title: "仪表盘",
+          },
+        },
+      ];
+
+      Object.assign(
+        historys,
+        JSON.parse(sessionStorage.getItem("historys")) || initHistorys
+      );
+      setTab(route);
+    };
+    initFun();
+    onUnmounted(() => {
+      emitter.off("collapse");
+      emitter.off("mobile");
+    });
+
+    watch(contextMenuVisible, () => {
+      if (contextMenuVisible.value) {
+        document.body.addEventListener("click", () => {
+          contextMenuVisible.value = false;
+        });
       } else {
-        document.body.removeEventListener('click', () => {
-          this.contextMenuVisible = false
-        })
+        document.body.removeEventListener("click", () => {
+          contextMenuVisible.value = false;
+        });
       }
-    },
-    $route(to) {
-      this.historys = this.historys.filter(item => !item.meta.hidden)
-      this.setTab(to)
-      sessionStorage.setItem('historys', JSON.stringify(this.historys))
-    }
+    });
+
+    watch(route, (to) => {
+      const bkHistory = historys.filter((item) => !item.meta.hidden)
+      historys.length = 0
+      Object.assign(historys,bkHistory)
+      setTab(to);
+      sessionStorage.setItem("historys", JSON.stringify(historys));
+    });
+
+    return {
+      historys,
+      activeValue,
+      contextMenuVisible,
+      left,
+      top,
+      isCollapse,
+      isMobile,
+      rightActive,
+      openContextMenu,
+      closeAll,
+      closeLeft,
+      closeRight,
+      closeOther,
+      setTab,
+      changeTab,
+      removeTab,
+    };
   }
-}
+};
 </script>
 <style lang="scss">
 .contextmenu {
@@ -225,6 +254,4 @@ export default {
   background: #f2f2f2;
   cursor: pointer;
 }
-
-
 </style>

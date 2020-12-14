@@ -24,9 +24,7 @@
         width="120"
       ></el-table-column>
       <el-table-column label="节点日期" width="180">
-        <template #default="scope">{{
-          scope.row.CreatedAt | formatDate
-        }}</template>
+        <template #default="scope">{{formatDate(scope.row.CreatedAt)}}</template>
       </el-table-column>
       <el-table-column
         label="业务代码"
@@ -66,37 +64,44 @@
 <script>
 import { formatTimeToStr } from '@/utils/date'
 import {getMyStated} from "@/api/workflowProcess"
+import { ref, reactive, getCurrentInstance, computed } from "vue";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 export default {
-    data(){
-        return{
-            tableData:[]
-        }
-    },
-    methods:{
-        view(row){
-            this.$router.push({
-                    name: "workflowUse",
-                    query: {
-                    workflowMoveID: row.ID
-                    }
-            })
-        }
-    },
-    async created(){
-        const res = await getMyStated()
-        if(res.code == 0){
-            this.tableData = res.data.wfms
-        }
-    },
-    filters:{   
-        formatDate: function(time) {
-            if (time != null && time != '') {
-                var date = new Date(time)
-                return formatTimeToStr(date, 'yyyy-MM-dd hh:mm:ss')
-            } else {
-                return ''
-            }
-        }
-    }
-}
+  name: "Need",
+  setup() {
+    const tableData = reactive([]);
+    const router = useRouter();
+    const view = (row) => {
+      router.push({
+        name: "workflowUse",
+        query: {
+          workflowMoveID: row.ID,
+        },
+      });
+    };
+    const formatDate = (time) => {
+      if (time != null && time != "") {
+        var date = new Date(time);
+        return formatTimeToStr(date, "yyyy-MM-dd hh:mm:ss");
+      } else {
+        return "";
+      }
+    };
+
+    const initFun = async () => {
+      const res = await getMyStated();
+      if (res.code == 0) {
+        Object.assign(tableData,res.data.wfms);
+      }
+    };
+
+    initFun();
+    return {
+      tableData,
+      view,
+      formatDate,
+    };
+  },
+};
 </script>

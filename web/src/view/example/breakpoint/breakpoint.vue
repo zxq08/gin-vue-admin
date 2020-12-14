@@ -48,9 +48,6 @@ export default {
       customColor: '#409eff'
     }
   },
-  created(){
-   
-  },
   methods: {
     // 选中文件的函数
     async choseFile(e) {

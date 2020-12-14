@@ -20,15 +20,9 @@
         width="120"
       ></el-table-column>
       <el-table-column label="节点日期" width="180">
-        <template #default="scope">{{
-          scope.row.CreatedAt | formatDate
-        }}</template>
+        <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
       </el-table-column>
-      <el-table-column
-        label="业务代码"
-        prop="businessType"
-        width="120"
-      ></el-table-column>
+      <el-table-column label="业务代码" prop="businessType" width="120"></el-table-column>
 
       <el-table-column
         label="当前节点"
@@ -38,7 +32,7 @@
       <el-table-column label="流程状态" width="120">
         <template #default="scope">
           <div>
-            {{ scope.row.isActive ? '进行中' : '已结束' }}
+            {{ scope.row.isActive ? "进行中" : "已结束" }}
           </div>
         </template>
       </el-table-column>
@@ -57,40 +51,46 @@
 </template>
 
 <script>
-import { formatTimeToStr } from '@/utils/date'
-import {getMyNeed} from "@/api/workflowProcess"
+import { formatTimeToStr } from "@/utils/date";
+import { getMyNeed } from "@/api/workflowProcess";
+import { ref, reactive, getCurrentInstance, computed } from "vue";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 export default {
-    data(){
-        return{
-            tableData:[]
-        }
-    },
-    methods:{
-         handle(row){
-              this.$router.push({
-                    name: "workflowUse",
-                    query: {
-                    workflowMoveID: row.ID
-                    }
-            })
-        }
-    },
-    async created(){
-        const res = await getMyNeed()
-        if(res.code == 0){
-            this.tableData = res.data.wfms 
-        }
-       
-    },
-    filters:{
-      formatDate: function(time) {
-      if (time != null && time != '') {
-        var date = new Date(time)
-        return formatTimeToStr(date, 'yyyy-MM-dd hh:mm:ss')
+  name: "Need",
+  setup() {
+    const tableData = reactive([]);
+    const router = useRouter();
+    const handle = (row) => {
+      router.push({
+        name: "workflowUse",
+        query: {
+          workflowMoveID: row.ID,
+        },
+      });
+    };
+    const formatDate = (time) => {
+      if (time != null && time != "") {
+        var date = new Date(time);
+        return formatTimeToStr(date, "yyyy-MM-dd hh:mm:ss");
       } else {
-        return ''
+        return "";
       }
-    }
-    }
-}
+    };
+
+    const initFun = async () => {
+      const res = await getMyNeed();
+      if (res.code == 0) {
+        Object.assign(tableData,res.data.wfms);
+      }
+    };
+
+    initFun();
+    return {
+      tableData,
+      handle,
+      formatDate,
+    };
+  },
+};
 </script>

@@ -4,7 +4,7 @@
       <el-col :span="12">
         <el-card v-if="state.os" class="card_item">
           <template #header>
-          <div>Runtime</div>
+            <div>Runtime</div>
           </template>
           <div>
             <el-row :gutter="10">
@@ -33,7 +33,7 @@
       <el-col :span="12">
         <el-card v-if="state.disk" class="card_item">
           <template #header>
-          <div>Disk</div>
+            <div>Disk</div>
           </template>
           <div>
             <el-row :gutter="10">
@@ -75,30 +75,30 @@
           :body-style="{ height: '180px', overflowY: 'scroll' }"
         >
           <template #header>
-          <div>CPU</div>
+            <div>CPU</div>
           </template>
           <div>
             <el-row :gutter="10">
               <el-col :span="12">physical number of cores:</el-col>
               <el-col :span="12" v-text="state.cpu.cores"> </el-col>
             </el-row>
-              <el-row v-for="(item, index) in state.cpu.cpus" :key="index" :gutter="10">
-                <el-col :span="12">core {{ index }}:</el-col>
-                <el-col :span="12"
-                  ><el-progress
-                    type="line"
-                    :percentage="+item.toFixed(0)"
-                    :color="colors"
-                  ></el-progress
-                ></el-col>
-              </el-row>
+            <el-row v-for="(item, index) in state.cpu.cpus" :key="index" :gutter="10">
+              <el-col :span="12">core {{ index }}:</el-col>
+              <el-col :span="12"
+                ><el-progress
+                  type="line"
+                  :percentage="+item.toFixed(0)"
+                  :color="colors"
+                ></el-progress
+              ></el-col>
+            </el-row>
           </div>
         </el-card>
       </el-col>
       <el-col :span="12">
         <el-card class="card_item" v-if="state.ram">
           <template #header>
-          <div>Ram</div>
+            <div>Ram</div>
           </template>
           <div>
             <el-row :gutter="10">
@@ -140,34 +140,39 @@
 
 <script>
 import { getSystemState } from "@/api/system.js";
+import { ref, reactive, onUnmounted } from "vue";
 export default {
   name: "State",
-  data() {
-    return {
-      timer:null,
-      state: {},
-      colors: [
-        { color: "#5cb87a", percentage: 20 },
-        { color: "#e6a23c", percentage: 40 },
-        { color: "#f56c6c", percentage: 80 },
-      ],
-    };
-  },
-  created() { 
-    this.reload();
-    this.timer = setInterval(() => {
-      this.reload();
-    }, 1000*10);
-  },
-  beforeUnmount(){
-    clearInterval(this.timer)
-    this.timer = null
-  },
-  methods: {
-    async reload() {
+  setup() {
+    let timer = null;
+    const state = reactive({});
+    const colors = reactive([
+      { color: "#5cb87a", percentage: 20 },
+      { color: "#e6a23c", percentage: 40 },
+      { color: "#f56c6c", percentage: 80 },
+    ]);
+
+    const reload = async () => {
       const { data } = await getSystemState();
-      this.state = data.server;
-    },
+      Object.assign(state, data.server);
+    };
+
+    const initFun = () => {
+      reload();
+      timer = setInterval(() => {
+        reload();
+      }, 1000 * 10);
+    };
+    initFun();
+    
+    onUnmounted(() => {
+      clearInterval(timer);
+      timer = null;
+    });
+    return {
+      state,
+      colors,
+    };
   },
 };
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div class="search-component">
     <transition name="el-fade-in-linear">
-      <div class="transition-box" style="display: inline-block; " v-show="show">
+      <div class="transition-box" style="display: inline-block" v-show="show">
         <el-select
           ref="search-input"
           @blur="hiddenSearch"
@@ -19,41 +19,49 @@
         </el-select>
       </div>
     </transition>
-    <div :style="{display:'inline-block',float:'right'}" class="user-box">
+    <div :style="{ display: 'inline-block', float: 'right' }" class="user-box">
       <i @click="showSearch()" class="el-icon-search search-icon"></i>
     </div>
   </div>
 </template>
 <script>
-import { mapGetters } from "vuex";
+import { computed, getCurrentInstance, ref } from "vue";
+import { mapGetters, useStore } from "vuex";
+import { useRouter } from "vue-router";
 
 export default {
   name: "searchComponent",
-  data() {
+  setup() {
+    const { ctx } = getCurrentInstance();
+    const store = useStore();
+    const value = ref("");
+    const router = useRouter();
+    const show = ref(false);
+    const routerList = computed(() => store.getters["router/routerList"]);
+    const changeRouter = () => {
+      router.push({ name: value.value });
+      value.value = "";
+    };
+    const hiddenSearch = () => {
+      show.value = false;
+    };
+    const showSearch = () => {
+      show.value = true;
+      ctx.$nextTick(() => {
+        ctx.$refs["search-input"].focus();
+      });
+    };
+
     return {
-      value: "",
-      show: false
+      value,
+      router,
+      show,
+      routerList,
+      changeRouter,
+      hiddenSearch,
+      showSearch,
     };
   },
-  computed: {
-    ...mapGetters("router", ["routerList"])
-  },
-  methods: {
-    changeRouter() {
-      this.$router.push({ name: this.value });
-      this.value = "";
-    },
-    hiddenSearch() {
-      this.show = false;
-    },
-    showSearch() {
-      this.show = true;
-      this.$nextTick(()=>{
-        this.$refs['search-input'].focus()
-      })
-    }
-  }
 };
 </script>
-<style lang="scss">
-</style>
+<style lang="scss"></style>
