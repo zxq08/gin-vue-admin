@@ -28,7 +28,7 @@
            {{ end -}}
 
            <el-form-item>
-           <el-button v-if="this.wf.clazz == 'start'" @click="start" type="primary">启动</el-button>
+           <el-button v-if="wf.clazz == 'start'" @click="start" type="primary">启动</el-button>
            <!-- complete传入流转参数 决定下一步会流转到什么位置 此处可以设置多个按钮来做不同的流转 -->
            <el-button v-if="canShow" @click="complete('yes')" type="primary">提交</el-button>
            <el-button v-if="showSelfNode" @click="complete('')" type="primary">确认</el-button>
@@ -43,11 +43,12 @@ import {
     startWorkflow,
     completeWorkflowMove
 } from "@/api/workflowProcess";
-import infoList from "@/mixins/infoList";
-import { mapGetters } from "vuex";
+import { infoList } from "@/mixins/infoList";
+import { useStore } from "vuex";
+import { useRouter,useRoute } from "vue-router"
+import { ref,reactive,getCurrentInstance,computed } from "vue"
 export default {
   name: "{{.StructName}}",
-  mixins: [infoList],
   props:{
       business:{
          type:Object,
@@ -66,15 +67,18 @@ export default {
         default:0
       }
    },
-  data() {
-    return {
+   setup(props){
+      const {ctx} getCurrentInstance()
+      const router = useRouter()
+      const route = useRoute()
+      const { getDictFun } = infoList();
+      const type = ref("");
       {{- range .Fields}}
           {{- if .DictType }}
-      {{ .DictType }}Options:[],
+           const {{ .DictType }}Options = reactive([]);
           {{ end -}}
       {{end -}}
-
-      formData: {
+      const  formData = reactive({
             {{range .Fields}}
             {{- if eq .FieldType "bool" -}}
                {{.FieldJson}}:false,
@@ -92,90 +96,96 @@ export default {
                {{.FieldJson}}:0,
             {{ end -}}
             {{ end }}
-      }
-    };
-  },
-  computed:{
-      showSelfNode(){
-         if(this.wf.assignType == "self" && this.move.promoterID == this.userInfo.ID){
-             return true
-         }else{
-             return false
-         }
-      },
-      canShow(){
-         if(this.wf.assignType == "user"){
-            if(this.wf.assignValue.indexOf(","+this.userInfo.ID+",")>-1 && this.wf.clazz == 'userTask'){
-               return true
-            }else{
-               return false
-            }
-         }else if(this.wf.assign_type == "authority"){
-            if(this.wf.assignValue.indexOf(","+this.userInfo.authorityId+",")>-1 && this.wf.clazz == 'userTask'){
-               return true
-            }else{
-               return false
-            }
-         }
-      },
-      ...mapGetters("user", ["userInfo"])
-  },
-  methods: {
-    async start() {
-      const res = await startWorkflow({
-            business:this.formData,
-            wf:{
-              workflowMoveID:this.workflowMoveID,
-              businessId:0,
-              businessType:"{{.Abbreviation}}",
-              workflowProcessID:this.wf.workflowProcessID,
-              workflowNodeID:this.wf.id,
-              promoterID:this.userInfo.ID,
-              operatorID:this.userInfo.ID,
-              action:"create",
-              param:""
-              }
-          });
-      if (res.code == 0) {
-        this.$message({
-          type:"success",
-          message:"启动成功"
-        })
-       this.back()
-      }
-    },
-    async complete(param){
-     const res = await completeWorkflowMove({
-            business:this.formData,
-            wf:{
-              workflowMoveID:this.workflowMoveID,
-              businessID:this.formData.ID,
-              businessType:"{{.Abbreviation}}",
-              workflowProcessID:this.wf.workflowProcessID,
-              workflowNodeID:this.wf.id,
-              promoterID:this.userInfo.ID,
-              operatorID:this.userInfo.ID,
-              action:"complete",
-              param:param
-              }
+      })
+      const userInfo =  computed(()=>store.getters["user/userInfo"])
+      const showSelfNode = computed(()=>{
+        if(props.wf.assignType == "self" && props.move.promoterID == userInfo.value.ID){
+          return true
+        }else{
+          return false
+        }
+      })
+      const canShow = computed(()=>{
+        if(props.wf.assignType == "user"){
+           if(props.wf.assignValue.indexOf(","+userInfo.value.ID+",")>-1 && props.wf.clazz == 'userTask'){
+              return true
+           }else{
+              return false
+           }
+        }else if(props.wf.assign_type == "authority"){
+           if(props.wf.assignValue.indexOf(","+userInfo.value.authorityId+",")>-1 && props.wf.clazz == 'userTask'){
+              return true
+           }else{
+              return false
+           }
+        }
      })
-     if(res.code == 0){
-       this.$message({
-          type:"success",
-          message:"提交成功"
-       })
-       this.back()
-     }
-    },
-    back(){
-        this.$router.go(-1)
-    }
-  },
-  async created() {
-    if(this.business){
-     this.formData = this.business
-    }
-}
+     const start = async () => {
+           const res = await startWorkflow({
+                 business:formData,
+                 wf:{
+                   workflowMoveID:props.workflowMoveID,
+                   businessId:0,
+                   businessType:"{{.Abbreviation}}",
+                   workflowProcessID:props.wf..workflowProcessID,
+                   workflowNodeID:props.wf.id,
+                   promoterID:userInfo.value.ID,
+                   operatorID:userInfo.value.ID,
+                   action:"create",
+                   param:""
+                   }
+               });
+           if (res.code == 0) {
+             ctx.$message({
+               type:"success",
+               message:"启动成功"
+             })
+            back()
+           }
+         }
+        const complete = async (param) =>{
+          const res = await completeWorkflowMove({
+                 business:formData,
+                 wf:{
+                   workflowMoveID:props.workflowMoveID,
+                   businessID:formData.ID,
+                   businessType:"{{.Abbreviation}}",
+                   workflowProcessID:props.wf.workflowProcessID,
+                   workflowNodeID:props.wf.id,
+                   promoterID:userInfo.value.ID,
+                   operatorID:userInfo.value.ID,
+                   action:"complete",
+                   param:param
+                   }
+          })
+          if(res.code == 0){
+            ctx.$message({
+               type:"success",
+               message:"提交成功"
+            })
+            back()
+          }
+         }
+         const back = () =>{
+             router.go(-1)
+         }
+        if(props.business){
+        Object.assign(formData,props.business)
+       }
+       return {
+       formData,
+       start,
+       canShow,
+       showSelfNode,
+       complete,
+       back,
+       {{ range .Fields -}}
+         {{- if .DictType }}
+           {{ .DictType }}Options,
+         {{ end -}}
+       {{- end }}
+       }
+   }
 };
 </script>
 

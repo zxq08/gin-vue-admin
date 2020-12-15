@@ -41,83 +41,94 @@ import {
     update{{.StructName}},
     find{{.StructName}}
 } from "@/api/{{.PackageName}}";  //  此处请自行替换地址
-import infoList from "@/mixins/infoList";
+import { infoList } from "@/mixins/infoList";
+import { ref,reactive,getCurrentInstance } from "vue"
+import { useRouter,useRoute } from "vue-router"
 export default {
   name: "{{.StructName}}",
-  mixins: [infoList],
-  data() {
-    return {
-      type: "",
-
-      {{- range .Fields}}
-          {{- if .DictType }}
-      {{ .DictType }}Options:[],
+  setup(){
+    const {ctx} getCurrentInstance()
+    const router = useRouter()
+    const route = useRoute()
+    const { getDictFun } = infoList();
+    const type = ref("");
+    {{- range .Fields}}
+        {{- if .DictType }}
+         const {{ .DictType }}Options = reactive([]);
+        {{ end -}}
+    {{end -}}
+    const  formData = reactive({
+          {{range .Fields}}
+          {{- if eq .FieldType "bool" -}}
+             {{.FieldJson}}:false,
           {{ end -}}
-      {{end -}}
+          {{- if eq .FieldType "string" -}}
+             {{.FieldJson}}:"",
+          {{ end -}}
+          {{- if eq .FieldType "int" -}}
+             {{.FieldJson}}:0,
+          {{ end -}}
+          {{- if eq .FieldType "time.Time" -}}
+             {{.FieldJson}}:new Date(),
+          {{ end -}}
+          {{- if eq .FieldType "float64" -}}
+             {{.FieldJson}}:0,
+          {{ end -}}
+          {{ end }}
+    })
+        const save = async () => {
+          let res;
+          switch (type.value) {
+            case "create":
+              res = await create{{.StructName}}(formData);
+              break;
+            case "update":
+              res = await update{{.StructName}}(formData);
+              break;
+            default:
+              res = await create{{.StructName}}(formData);
+              break;
+            }
+            if (res.code == 0) {
+              ctx.$message({
+                type:"success",
+                message:"创建/更改成功"
+              })
+            }
+          }
+          back(){
+            router.go(-1)
+          }
+          const initFunc = async () => {
+          // 建议通过url传参获取目标数据ID 调用 find方法进行查询数据操作 从而决定本页面是create还是update 以下为id作为url参数示例
+            if(route.query.id){
+               const res = await find{{.StructName}}({ ID: route.query.id })
+               if(res.code == 0){
+                 Object.assign(formData,res.data.re{{.Abbreviation}})
+                 type.value == "update"
+               }
+            }else{
+               type.value == "create"
+            }
+              {{ range .Fields -}}
+                {{- if .DictType }}
+                Object.assign({{ .DictType }}Options,await this.getDictFun("{{.DictType}}"))
+                {{ end -}}
+              {{- end }}
+            }
+        initFunc()
+        return {
+          formData,
+          save,
+          back,
+          {{ range .Fields -}}
+            {{- if .DictType }}
+             {{ .DictType }}Options,
+            {{ end -}}
+          {{- end }}
+        }
+  }
 
-      formData: {
-            {{range .Fields}}
-            {{- if eq .FieldType "bool" -}}
-               {{.FieldJson}}:false,
-            {{ end -}}
-            {{- if eq .FieldType "string" -}}
-               {{.FieldJson}}:"",
-            {{ end -}}
-            {{- if eq .FieldType "int" -}}
-               {{.FieldJson}}:0,
-            {{ end -}}
-            {{- if eq .FieldType "time.Time" -}}
-               {{.FieldJson}}:new Date(),
-            {{ end -}}
-            {{- if eq .FieldType "float64" -}}
-               {{.FieldJson}}:0,
-            {{ end -}}
-            {{ end }}
-      }
-    };
-  },
-  methods: {
-    async save() {
-      let res;
-      switch (this.type) {
-        case "create":
-          res = await create{{.StructName}}(this.formData);
-          break;
-        case "update":
-          res = await update{{.StructName}}(this.formData);
-          break;
-        default:
-          res = await create{{.StructName}}(this.formData);
-          break;
-      }
-      if (res.code == 0) {
-        this.$message({
-          type:"success",
-          message:"创建/更改成功"
-        })
-      }
-    },
-    back(){
-        this.$router.go(-1)
-    }
-  },
-  async created() {
-   // 建议通过url传参获取目标数据ID 调用 find方法进行查询数据操作 从而决定本页面是create还是update 以下为id作为url参数示例
-    if(this.$route.query.id){
-    const res = await find{{.StructName}}({ ID: this.$route.query.id })
-    if(res.code == 0){
-       this.formData = res.data.re{{.Abbreviation}}
-       this.type == "update"
-     }
-    }else{
-     this.type == "create"
-   }
-  {{ range .Fields -}}
-    {{- if .DictType }}
-    await this.getDict("{{.DictType}}");
-    {{ end -}}
-  {{- end }}
-}
 };
 </script>
 

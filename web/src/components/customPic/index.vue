@@ -32,7 +32,6 @@ export default {
     },
   },
   setup(props) {
-    console.log(props)
     const store = useStore();
     const path = ref(process.env.VUE_APP_BASE_API);
     const userInfo = computed(() => store.getters["user/userInfo"]);
