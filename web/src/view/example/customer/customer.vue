@@ -20,20 +20,29 @@
         <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
       </el-table-column>
       <el-table-column label="姓名" prop="customerName" width="120"></el-table-column>
-      <el-table-column label="电话" prop="customerPhoneData" width="120"></el-table-column>
+      <el-table-column
+        label="电话"
+        prop="customerPhoneData"
+        width="120"
+      ></el-table-column>
       <el-table-column label="接入人ID" prop="sysUserId" width="120"></el-table-column>
       <el-table-column label="按钮组" min-width="160">
         <template #default="scope">
-          <el-button @click="updateCustomer(scope.row)" size="small" type="text">变更</el-button>
+          <el-button @click="updateCustomer(scope.row)" size="small" type="text"
+            >变更</el-button
+          >
           <el-popover placement="top" width="160" v-model="scope.row.visible">
             <p>确定要删除吗？</p>
             <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
-              <el-button type="primary" size="mini" @click="deleteCustomer(scope.row)">确定</el-button>
+              <el-button size="mini" type="text" @click="scope.row.visible = false"
+                >取消</el-button
+              >
+              <el-button type="primary" size="mini" @click="deleteCustomer(scope.row)"
+                >确定</el-button
+              >
             </div>
             <template #reference>
-
-            <el-button type="danger" icon="el-icon-delete" size="mini" >删除</el-button>
+              <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
             </template>
           </el-popover>
         </template>
@@ -44,7 +53,7 @@
       :current-page="page"
       :page-size="pageSize"
       :page-sizes="[10, 30, 50, 100]"
-      :style="{float:'right',padding:'20px'}"
+      :style="{ float: 'right', padding: '20px' }"
       :total="total"
       @current-change="handleCurrentChange"
       @size-change="handleSizeChange"
@@ -61,13 +70,15 @@
         </el-form-item>
       </el-form>
       <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="closeDialog">取 消</el-button>
-        <el-button @click="enterDialog" type="primary">确 定</el-button>
-      </div>
+        <div class="dialog-footer">
+          <el-button @click="closeDialog">取 消</el-button>
+          <el-button @click="enterDialog" type="primary">确 定</el-button>
+        </div>
       </template>
     </el-dialog>
-    <div class="tips"> 在资源权限中将此角色的资源权限清空 或者不包含创建者的角色 即可屏蔽此客户资源的显示</div>
+    <div class="tips">
+      在资源权限中将此角色的资源权限清空 或者不包含创建者的角色 即可屏蔽此客户资源的显示
+    </div>
   </div>
 </template>
 
@@ -77,91 +88,103 @@ import {
   updateExaCustomer,
   deleteExaCustomer,
   getExaCustomer,
-  getExaCustomerList
+  getExaCustomerList,
 } from "@/api/customer";
 import { formatTimeToStr } from "@/utils/date";
-import infoList from "@/mixins/infoList";
+import { infoList } from "@/mixins/infoList";
+import { ref, getCurrentInstance, reactive } from "vue";
 
 export default {
   name: "Customer",
-  mixins: [infoList],
-  data() {
-    return {
-      listApi: getExaCustomerList,
-      dialogFormVisible: false,
-      visible: false,
-      type: "",
-      form: {
-        customerName: "",
-        customerPhoneData: ""
-      }
-    };
-  },
-  
-  methods: {
-    formatDate: function(time) {
+  setup() {
+    const { ctx } = getCurrentInstance();
+    const { tableInfo, handleSizeChange, handleCurrentChange, getTableData } = infoList(
+      getExaCustomerList
+    );
+    const dialogFormVisible = ref(false);
+    const visible = ref(false);
+    const type = ref("");
+    const form = reactive({
+      ID: 0,
+      customerName: "",
+      customerPhoneData: "",
+    });
+    const formatDate = (time) => {
       if (time != null && time != "") {
         var date = new Date(time);
         return formatTimeToStr(date, "yyyy-MM-dd hh:mm:ss");
       } else {
         return "";
       }
-    },
-    async updateCustomer(row) {
+    };
+    const updateCustomerFunc = async (row) => {
       const res = await getExaCustomer({ ID: row.ID });
-      this.type = "update";
+      type.value = "update";
       if (res.code == 0) {
-        this.form = res.data.customer;
-        this.dialogFormVisible = true;
+        Object.assign(form, res.data.customer);
+        dialogFormVisible.value = true;
       }
-    },
-    closeDialog() {
-      this.dialogFormVisible = false;
-      this.form = {
+    };
+    const closeDialog = () => {
+      dialogFormVisible.value = false;
+      Object.assign(form, {
+        ID: 0,
         customerName: "",
-        customerPhoneData: ""
-      };
-    },
-    async deleteCustomer(row) {
-      this.visible = false;
+        customerPhoneData: "",
+      });
+    };
+    const deleteCustomerFunc = async (row) => {
+      visible.value = false;
       const res = await deleteExaCustomer({ ID: row.ID });
       if (res.code == 0) {
-        this.$message({
+        ctx.$message({
           type: "success",
-          message: "删除成功"
+          message: "删除成功",
         });
-        this.getTableData();
+        getTableData();
       }
-    },
-    async enterDialog() {
+    };
+    const enterDialog = async () => {
       let res;
-      switch (this.type) {
+      switch (type.value) {
         case "create":
-          res = await createExaCustomer(this.form);
+          res = await createExaCustomer(form);
           break;
         case "update":
-          res = await updateExaCustomer(this.form);
+          res = await updateExaCustomer(form);
           break;
         default:
-          res = await createExaCustomer(this.form);
+          res = await createExaCustomer(form);
           break;
       }
 
       if (res.code == 0) {
-        this.closeDialog();
-        this.getTableData();
+        closeDialog();
+        getTableData();
       }
-    },
-    openDialog() {
-      this.type = "create";
-      this.dialogFormVisible = true;
-    }
+    };
+    const openDialog = () => {
+      type.value = "create";
+      dialogFormVisible.value = true;
+    };
+    getTableData();
+    return {
+      tableInfo,
+      handleSizeChange,
+      handleCurrentChange,
+      dialogFormVisible,
+      visible,
+      type,
+      form,
+      formatDate,
+      updateCustomerFunc,
+      closeDialog,
+      deleteCustomerFunc,
+      enterDialog,
+      openDialog,
+    };
   },
-  created() {
-    this.getTableData();
-  }
 };
 </script>
 
-<style>
-</style>
+<style></style>

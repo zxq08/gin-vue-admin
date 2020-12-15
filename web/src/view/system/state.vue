@@ -140,7 +140,7 @@
 
 <script>
 import { getSystemState } from "@/api/system.js";
-import { ref, reactive, onUnmounted } from "vue";
+import { reactive, onUnmounted } from "vue";
 export default {
   name: "State",
   setup() {

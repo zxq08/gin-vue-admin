@@ -34,12 +34,12 @@
 </template>
 <script>
 import { findWorkflowStep, getWorkflowMoveByID } from "@/api/workflowProcess.js";
-import { ref, reactive, getCurrentInstance, computed, createTextVNode } from "vue";
+import { ref, reactive, getCurrentInstance, computed } from "vue";
 import { useRoute } from "vue-router";
 export default {
   name: "WorklowUse",
   setup() {
-    const { appContext, ctx } = getCurrentInstance();
+    const { appContext } = getCurrentInstance();
 
     const route = useRoute();
     const done = ref(false);
@@ -71,7 +71,6 @@ export default {
       }
       const compent = await import("@/" + path);
       appContext.components.WorkflowInfo = compent.default;
-      console.log(appContext.components);
       done.value = true;
     };
     const initWFU = async () => {

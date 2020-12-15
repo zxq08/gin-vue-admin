@@ -164,7 +164,6 @@ export default {
     const drawer = ref(false);
     const dialogType = ref("add");
     const activeRow = reactive({});
-    const activeUserId = ref(0);
     const dialogTitle = ref("新增角色");
     const dialogFormVisible = ref(false);
     const apiDialogFlag = ref(false);
@@ -269,7 +268,7 @@ export default {
               {
                 const res = await createAuthority(form);
                 if (res.code == 0) {
-                  $message({
+                  ctx.$message({
                     type: "success",
                     message: "添加成功!",
                   });
@@ -396,6 +395,8 @@ export default {
       closeDialog,
       drawer,
       activeRow,
+      autoEnter,
+      deleteAuth
     };
   },
 };

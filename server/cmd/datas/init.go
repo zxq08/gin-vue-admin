@@ -39,7 +39,6 @@ func InitMysqlTables(db *gorm.DB) {
 		model.JwtBlacklist{},
 		model.ExaFileChunk{},
 		model.SysDictionary{},
-		model.ExaSimpleUploader{},
 		model.SysOperationRecord{},
 		model.SysDictionaryDetail{},
 		model.SysBaseMenuParameter{},

@@ -188,14 +188,13 @@ import {
 import { infoList } from "@/mixins/infoList";
 import icon from "@/view/superAdmin/menu/icon";
 import { ref, reactive, getCurrentInstance } from "vue";
-import { assign } from "@antv/util";
 
 export default {
   name: "Menus",
   components: {
     icon
   },
-  setup(props) {
+  setup() {
     const { ctx } = getCurrentInstance();
     const {
       tableInfo,

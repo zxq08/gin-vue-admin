@@ -133,7 +133,7 @@ export default {
         return;
       }
       percentage.value = Math.floor(
-        ((formDataList.length - waitNum) / formDataList.length) * 100
+        ((formDataList.length - waitNum.value) / formDataList.length) * 100
       );
       if (percentage.value == 100) {
         percentageFlage.value = false;

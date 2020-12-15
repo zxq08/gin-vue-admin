@@ -43,7 +43,6 @@ func MysqlTables(db *gorm.DB) {
 		model.ExaFileUploadAndDownload{},
 		model.ExaFile{},
 		model.ExaFileChunk{},
-		model.ExaSimpleUploader{},
 		model.ExaCustomer{},
 		model.SysOperationRecord{},
 		model.WorkflowProcess{},

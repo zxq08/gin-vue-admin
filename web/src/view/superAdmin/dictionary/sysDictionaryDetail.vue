@@ -124,7 +124,7 @@ import { ref, reactive, getCurrentInstance } from "vue";
 import { useRoute } from  "vue-router"
 export default {
   name: "SysDictionaryDetail",
-  setup(props) {
+  setup() {
     const route = useRoute()
     const { ctx } = getCurrentInstance();
     const {
@@ -262,7 +262,6 @@ export default {
       tableInfo,
       handleCurrentChange,
       handleSizeChange,
-      closeDialog,
       dialogFormVisible,
       rules,
       formData,

@@ -30,7 +30,7 @@ export default {
       type: Object
     }
   },
-  setup(props) {
+  setup() {
     const input = ref("");
     const options = reactive([
       { key: "platform-eleme", label: "el-icon-platform-eleme" },

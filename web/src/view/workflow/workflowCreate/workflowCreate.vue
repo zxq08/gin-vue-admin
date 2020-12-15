@@ -57,7 +57,7 @@ import {
 import gvaWfd from "@/components/gva-wfd";
 import { getUserList } from "@/api/user";
 import { getAuthorityList } from "@/api/authority";
-import { ref, reactive, getCurrentInstance, computed } from "vue";
+import { ref, reactive, getCurrentInstance } from "vue";
 import { useRoute } from "vue-router";
 export default {
   name: "Workflow",
@@ -158,7 +158,6 @@ export default {
       }
       if (route.query.id) {
         const res = await findWorkflowProcess({ id: route.query.id });
-        disabled.value = route.query.type == "view";
         if (res.code == 0) {
           res.data.reworkflowProcess.nodes.map((item) => {
             if (item.assignValue) {

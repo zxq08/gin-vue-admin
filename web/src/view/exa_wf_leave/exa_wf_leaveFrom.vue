@@ -36,12 +36,11 @@
       </el-form-item>
     </el-form>
   </div>
-</template>
+</template> 
 
 <script>
 import { startWorkflow, completeWorkflowMove } from "@/api/workflowProcess";
-import { mapGetters } from "vuex";
-import { ref, reactive, getCurrentInstance,computed } from "vue";
+import { reactive, getCurrentInstance,computed } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 export default {
@@ -77,13 +76,13 @@ export default {
 
     const canShow = computed(() => {
       if (props.wf.assignType == "user") {
-        if (props.wf.assginValue.indexOf("," + userInfo.ID + ",") > 0) {
+        if (props.wf.assginValue.indexOf("," + userInfo.value.ID + ",") > 0) {
           return true;
         } else {
           return false;
         }
       } else if (props.wf.assign_type == "authority") {
-        if (props.wf.assginValue.indexOf("," + userInfo.authorityId + ",") > 0) {
+        if (props.wf.assginValue.indexOf("," + userInfo.value.authorityId + ",") > 0) {
           return true;
         } else {
           return false;
@@ -101,8 +100,8 @@ export default {
           businessType: "leave",
           workflowProcessID: props.wf.workflowProcessID,
           workflowNodeID: props.wf.id,
-          promoterID: userInfo.ID,
-          operatorID: userInfo.ID,
+          promoterID: userInfo.value.ID,
+          operatorID: userInfo.value.ID,
           action: "create",
           param: "",
         },
@@ -124,8 +123,8 @@ export default {
           businessType: "leave",
           workflowProcessID: props.wf.workflowProcessID,
           workflowNodeID: props.wf.id,
-          promoterID: userInfo.ID,
-          operatorID: userInfo.ID,
+          promoterID: userInfo.value.ID,
+          operatorID: userInfo.value.ID,
           action: "complete",
           param: param,
         },

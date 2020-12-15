@@ -26,7 +26,7 @@
 </template>
 <script>
 import { computed, getCurrentInstance, ref } from "vue";
-import { mapGetters, useStore } from "vuex";
+import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 
 export default {
@@ -41,7 +41,7 @@ export default {
     const changeRouter = () => {
       router.push({ name: value.value });
       value.value = "";
-    };
+    }; 
     const hiddenSearch = () => {
       show.value = false;
     };

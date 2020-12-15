@@ -134,7 +134,7 @@ import { ref, reactive, getCurrentInstance } from "vue";
 
 export default {
   name: "SysOperationRecord",
-  setup(props) {
+  setup() {
     const { ctx } = getCurrentInstance();
     const {
       tableInfo,

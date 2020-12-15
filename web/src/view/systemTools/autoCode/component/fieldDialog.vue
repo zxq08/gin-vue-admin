@@ -10,10 +10,7 @@
     >
       <el-form-item label="Field名称" prop="fieldName">
         <el-col :span="6">
-          <el-input
-            v-model="dialogMiddle.fieldName"
-            autocomplete="off"
-          ></el-input>
+          <el-input v-model="dialogMiddle.fieldName" autocomplete="off"></el-input>
         </el-col>
         <el-col :offset="1" :span="2">
           <el-button @click="autoFill">自动填充</el-button>
@@ -21,34 +18,22 @@
       </el-form-item>
       <el-form-item label="Field中文名" prop="fieldDesc">
         <el-col :span="6">
-          <el-input
-            v-model="dialogMiddle.fieldDesc"
-            autocomplete="off"
-          ></el-input>
+          <el-input v-model="dialogMiddle.fieldDesc" autocomplete="off"></el-input>
         </el-col>
       </el-form-item>
       <el-form-item label="FieldJSON" prop="fieldJson">
         <el-col :span="6">
-          <el-input
-            v-model="dialogMiddle.fieldJson"
-            autocomplete="off"
-          ></el-input>
+          <el-input v-model="dialogMiddle.fieldJson" autocomplete="off"></el-input>
         </el-col>
       </el-form-item>
       <el-form-item label="数据库字段名" prop="columnName">
         <el-col :span="6">
-          <el-input
-            v-model="dialogMiddle.columnName"
-            autocomplete="off"
-          ></el-input>
+          <el-input v-model="dialogMiddle.columnName" autocomplete="off"></el-input>
         </el-col>
       </el-form-item>
       <el-form-item label="数据库字段描述" prop="comment">
         <el-col :span="6">
-          <el-input
-            v-model="dialogMiddle.comment"
-            autocomplete="off"
-          ></el-input>
+          <el-input v-model="dialogMiddle.comment" autocomplete="off"></el-input>
         </el-col>
       </el-form-item>
       <el-form-item label="Field数据类型" prop="fieldType">
@@ -134,111 +119,109 @@
 </template>
 <script>
 import { getDict } from "@/utils/dictionary";
-import { toSQLLine , toLowerCase } from "@/utils/stringFun.js";
+import { toSQLLine, toLowerCase } from "@/utils/stringFun.js";
 import { getSysDictionaryList } from "@/api/sysDictionary";
+import { reactive, ref } from "vue";
 export default {
   name: "FieldDialog",
   props: {
     dialogMiddle: {
       type: Object,
-      default: function() {
+      default: function () {
         return {};
-      }
-    }
+      },
+    },
   },
-  data() {
-    return {
-      dbfdOptions: [],
-      visible: false,
-      dictOptions: [],
-      typeSearchOptions: [
-        {
-          label: "=",
-          value: "="
-        },
-        {
-          label: "<>",
-          value: "<>"
-        },
-        {
-          label: ">",
-          value: ">"
-        },
-        {
-          label: "<",
-          value: "<"
-        },
-        {
-          label: "LIKE",
-          value: "LIKE"
-        }
-      ],
-      typeOptions: [
-        {
-          label: "字符串",
-          value: "string"
-        },
-        {
-          label: "整型",
-          value: "int"
-        },
-        {
-          label: "布尔值",
-          value: "bool"
-        },
-        {
-          label: "浮点型",
-          value: "float64"
-        },
-        {
-          label: "时间",
-          value: "time.Time"
-        }
-      ],
-      rules: {
-        fieldName: [
-          { required: true, message: "请输入field英文名", trigger: "blur" }
-        ],
-        fieldDesc: [
-          { required: true, message: "请输入field中文名", trigger: "blur" }
-        ],
-        fieldJson: [
-          { required: true, message: "请输入field格式化json", trigger: "blur" }
-        ],
-        columnName: [
-          { required: true, message: "请输入数据库字段", trigger: "blur" }
-        ],
-        fieldType: [
-          { required: true, message: "请选择field数据类型", trigger: "blur" }
-        ]
+  setup(props) {
+    const dbfdOptions = reactive([]);
+    const visible = ref(false);
+    const dictOptions = reactive([]);
+    const typeSearchOptions = reactive([
+      {
+        label: "=",
+        value: "=",
+      },
+      {
+        label: "<>",
+        value: "<>",
+      },
+      {
+        label: ">",
+        value: ">",
+      },
+      {
+        label: "<",
+        value: "<",
+      },
+      {
+        label: "LIKE",
+        value: "LIKE",
+      },
+    ]);
+    const typeOptions = reactive([
+      {
+        label: "字符串",
+        value: "string",
+      },
+      {
+        label: "整型",
+        value: "int",
+      },
+      {
+        label: "布尔值",
+        value: "bool",
+      },
+      {
+        label: "浮点型",
+        value: "float64",
+      },
+      {
+        label: "时间",
+        value: "time.Time",
+      },
+    ]);
+    const rules = reactive({
+      fieldName: [{ required: true, message: "请输入field英文名", trigger: "blur" }],
+      fieldDesc: [{ required: true, message: "请输入field中文名", trigger: "blur" }],
+      fieldJson: [{ required: true, message: "请输入field格式化json", trigger: "blur" }],
+      columnName: [{ required: true, message: "请输入数据库字段", trigger: "blur" }],
+      fieldType: [{ required: true, message: "请选择field数据类型", trigger: "blur" }],
+    });
+    const autoFill = () => {
+      props.dialogMiddle.fieldJson = toLowerCase(props.dialogMiddle.fieldName);
+      props.dialogMiddle.columnName = toSQLLine(props.dialogMiddle.fieldJson);
+    };
+    const getDbfdOptions = async () => {
+      props.dialogMiddle.dataType = "";
+      props.dialogMiddle.dataTypeLong = "";
+      props.dialogMiddle.fieldSearchType = "";
+      props.dialogMiddle.dictType = "";
+      if (props.dialogMiddle.fieldType) {
+        const res = await getDict(props.dialogMiddle.fieldType);
+        dbfdOptions.length = 0;
+        Object.assign(dbfdOptions, res);
       }
     };
+    const initFunc = async () => {
+      const dictRes = await getSysDictionaryList({
+        page: 1,
+        pageSize: 999999,
+      });
+      dictOptions.length = 0;
+      Object.assign(dictOptions, dictRes.data.list);
+    };
+    initFunc();
+    return {
+      dbfdOptions,
+      visible,
+      dictOptions,
+      typeSearchOptions,
+      typeOptions,
+      rules,
+      autoFill,
+      getDbfdOptions,
+    };
   },
-  methods: {
-     autoFill(){
-        this.dialogMiddle.fieldJson = toLowerCase(this.dialogMiddle.fieldName)
-        this.dialogMiddle.columnName = toSQLLine(this.dialogMiddle.fieldJson)
-    },
-    async getDbfdOptions() {
-        this.dialogMiddle.dataType = ""
-        this.dialogMiddle.dataTypeLong = ""
-        this.dialogMiddle.fieldSearchType = ""
-        this.dialogMiddle.dictType = ""
-      if (this.dialogMiddle.fieldType) {
-        const res = await getDict(this.dialogMiddle.fieldType);
-        this.dbfdOptions = res;
-      }
-    }
-  },
-  async created() {
-    const dictRes = await getSysDictionaryList({
-      page: 1,
-      pageSize: 999999
-    });
-
-    this.dictOptions = dictRes.data.list
-  }
 };
 </script>
-<style lang="scss">
-</style>
+<style lang="scss"></style>

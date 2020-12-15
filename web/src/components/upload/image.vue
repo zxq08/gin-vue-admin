@@ -1,13 +1,3 @@
-<!--
-  <div>
-    带压缩的上传
-    <upload-image v-model="imageUrl" :fileSize="512" />
-    已上传文件 {{ imageUrl }}
-  </div>
-
-
--->
-
 <template>
   <div>
     <el-upload
@@ -25,15 +15,11 @@
   </div>
 </template>
 <script>
-const path = process.env.VUE_APP_BASE_API;
-import { mapGetters } from "vuex";
+import { useStore } from "vuex";
 import ImageCompress from "@/utils/image.js";
+import { computed, getCurrentInstance, ref } from "vue";
 export default {
   name: "upload-image",
-  model: {
-    prop: "imageUrl",
-    event: "change",
-  },
   props: {
     imageUrl: {
       type: String,
@@ -48,31 +34,34 @@ export default {
       default: 1920, // 图片长宽上限
     },
   },
-  data() {
-    return {
-      path: path,
-    };
-  },
-  computed: {
-    ...mapGetters("user", ["userInfo", "token"]),
-  },
-  methods: {
-    beforeImageUpload(file) {
-      let isRightSize = file.size / 1024 < this.fileSize;
+  setup(props) {
+    const { ctx } = getCurrentInstance();
+    const store = useStore();
+    const path = ref(process.env.VUE_APP_BASE_API);
+    const token = computed(store.getters["user/token"]);
+    const beforeImageUpload = (file) => {
+      let isRightSize = file.size / 1024 < props.fileSize;
       if (!isRightSize) {
         // 压缩
-        let compress = new ImageCompress(file, this.fileSize, this.maxWH);
+        let compress = new ImageCompress(file, props.fileSize, props.fileSize);
         return compress.compress();
       }
       return isRightSize;
-    },
-    handleImageSuccess(res) {
+    };
+    const handleImageSuccess = (res) => {
       // this.imageUrl = URL.createObjectURL(file.raw);
-      const {  data } = res;
+      const { data } = res;
       if (data.file) {
-        this.$emit("change", data.file.url);
+        ctx.$emit("change", data.file.url);
       }
-    },
+    };
+
+    return {
+      path,
+      token,
+      beforeImageUpload,
+      handleImageSuccess,
+    };
   },
 };
 </script>
