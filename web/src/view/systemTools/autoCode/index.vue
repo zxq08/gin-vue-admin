@@ -120,7 +120,7 @@
         width="130"
       ></el-table-column>
       <el-table-column prop="dictType" label="字典" width="130"></el-table-column>
-      <el-table-column label="操作" width="300">
+      <el-table-column label="操作" width="300" fixed="right">
         <template #default="scope">
           <el-button
             size="mini"
@@ -168,8 +168,8 @@
       <el-button @click="enterForm" type="primary">生成代码</el-button>
     </div>
     <!-- 组件弹窗 -->
-    <el-dialog title="组件内容" v-model="dialogFlag">
-      <FieldDialog class="gva-dialog-body" v-if="dialogFlag" :dialogMiddle="dialogMiddle" ref="fieldDialog" />
+    <el-dialog :close-on-click-modal="false" title="组件内容" v-model="dialogFlag">
+      <FieldDialog class="gva-dialog-body" v-if="dialogFlag" :dialogMiddle="dialogMiddle.form" ref="fieldDialog" />
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="closeDialog">取 消</el-button>
@@ -237,7 +237,7 @@ export default {
         },
       ],
     });
-    const dialogMiddle = reactive({});
+    const dialogMiddle = reactive({form:{}});
     const bk = reactive({});
     const dialogFlag = ref(false);
 
@@ -246,10 +246,10 @@ export default {
       if (item) {
         addFlag.value = "edit";
         Object.assign(bk, JSON.parse(JSON.stringify(item)));
-        Object.assign(dialogMiddle, item);
+        dialogMiddle.form = item
       } else {
         addFlag.value = "add";
-        Object.assign(dialogMiddle, JSON.parse(JSON.stringify(fieldTemplate)));
+        dialogMiddle.form = JSON.parse(JSON.stringify(fieldTemplate))
       }
     };
     const moveUpField = (index) => {
@@ -272,9 +272,9 @@ export default {
     const enterDialog = () => {
       ctx.$refs.fieldDialog.$refs.fieldDialogFrom.validate((valid) => {
         if (valid) {
-          dialogMiddle.fieldName = toUpperCase(dialogMiddle.fieldName);
+          dialogMiddle.form.fieldName = toUpperCase(dialogMiddle.form.fieldName);
           if (addFlag.value == "add") {
-            form.fields.push(dialogMiddle);
+            form.fields.push(dialogMiddle.form);
           }
           dialogFlag.value = false;
         } else {
@@ -284,7 +284,7 @@ export default {
     };
     const closeDialog = () => {
       if (addFlag.value == "edit") {
-        Object.assign(dialogMiddle, bk);
+        Object.assign(dialogMiddle.form, bk);
       }
       dialogFlag.value = false;
     };

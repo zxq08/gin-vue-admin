@@ -52,9 +52,11 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog :before-close="handleClose" :title="dialogTitle" v-model="dialogFormVisible">
-      <el-form
+    <el-dialog :close-on-click-modal="false" :before-close="handleClose" :title="dialogTitle" v-model="dialogFormVisible">
+      <div
       class="gva-dialog-body"
+      >
+      <el-form
         :inline="true"
         :model="form"
         :rules="rules"
@@ -165,6 +167,7 @@
             </template>
           </el-table-column>
         </el-table>
+        </div>
       </div>
       <template #footer>
         <div class="dialog-footer">

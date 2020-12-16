@@ -73,7 +73,7 @@
       layout="total, sizes, prev, pager, next, jumper"
     ></el-pagination>
 
-    <el-dialog :before-close="closeDialog" v-model="dialogFormVisible" title="弹窗操作">
+    <el-dialog :close-on-click-modal="false" :before-close="closeDialog" v-model="dialogFormVisible" title="弹窗操作">
       <el-form class="gva-dialog-body" ref="elForm" :model="formData" :rules="rules" size="medium" label-width="110px">
         <el-form-item label="展示值" prop="label">
           <el-input

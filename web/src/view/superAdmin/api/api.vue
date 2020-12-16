@@ -105,7 +105,7 @@
       layout="total, sizes, prev, pager, next, jumper"
     ></el-pagination>
 
-    <el-dialog
+    <el-dialog :close-on-click-modal="false"
       :before-close="closeDialog"
       :title="dialogTitle"
       v-model="dialogFormVisible"

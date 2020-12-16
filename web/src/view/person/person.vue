@@ -77,7 +77,7 @@
 
     <ChooseImg ref="chooseImg" @enter-img="enterImg" />
 
-    <el-dialog 
+    <el-dialog :close-on-click-modal="false" 
       v-model="showPassword"
       @close="clearPassword"
       title="修改密码"

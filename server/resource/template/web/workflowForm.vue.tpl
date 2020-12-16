@@ -68,7 +68,7 @@ export default {
       }
    },
    setup(props){
-      const {ctx} getCurrentInstance()
+      const {ctx} = getCurrentInstance()
       const router = useRouter()
       const route = useRoute()
       const { getDictFun } = infoList();
@@ -79,6 +79,7 @@ export default {
           {{ end -}}
       {{end -}}
       const  formData = reactive({
+            ID:0,
             {{range .Fields}}
             {{- if eq .FieldType "bool" -}}
                {{.FieldJson}}:false,
@@ -127,7 +128,7 @@ export default {
                    workflowMoveID:props.workflowMoveID,
                    businessId:0,
                    businessType:"{{.Abbreviation}}",
-                   workflowProcessID:props.wf..workflowProcessID,
+                   workflowProcessID:props.wf.workflowProcessID,
                    workflowNodeID:props.wf.id,
                    promoterID:userInfo.value.ID,
                    operatorID:userInfo.value.ID,
@@ -169,9 +170,17 @@ export default {
          const back = () =>{
              router.go(-1)
          }
-        if(props.business){
-        Object.assign(formData,props.business)
-       }
+         const initFunc = async () =>{
+         {{ range .Fields -}}
+           {{- if .DictType }}
+           Object.assign({{ .DictType }}Options,await this.getDictFun("{{.DictType}}"))
+           {{ end -}}
+         {{- end }}
+         if(props.business){
+          Object.assign(formData,props.business)
+         }
+         }
+         initFunc()
        return {
        formData,
        start,

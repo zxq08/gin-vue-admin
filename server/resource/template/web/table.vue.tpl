@@ -52,7 +52,7 @@
     >
     <el-table-column type="selection" width="55"></el-table-column>
     <el-table-column label="日期" width="180">
-         <template #default="scope">{{ "{{scope.row.CreatedAt|formatDate}}" }}</template>
+         <template #default="scope">{{ "{{ formatDate(scope.row.CreatedAt) }}" }}</template>
     </el-table-column>
     {{range .Fields}}
     {{- if .DictType}}
@@ -67,7 +67,7 @@
     </el-table-column> {{- else }}
     <el-table-column label="{{.FieldDesc}}" prop="{{.FieldJson}}" width="120"></el-table-column> {{ end }}
     {{ end }}
-      <el-table-column label="按钮组">
+      <el-table-column fixed="right" label="按钮组">
         <template #default="scope">
           <el-button class="table-button" @click="update{{.StructName}}Func(scope.row)" size="small" type="primary" icon="el-icon-edit">变更</el-button>
           <el-popover placement="top" width="160" v-model="scope.row.visible">
@@ -95,8 +95,8 @@
       layout="total, sizes, prev, pager, next, jumper"
     ></el-pagination>
 
-    <el-dialog :before-close="closeDialog" :visible.sync="dialogFormVisible" title="弹窗操作">
-      <el-form :model="formData" label-position="right" label-width="80px">
+    <el-dialog :close-on-click-modal="false" :before-close="closeDialog" :visible="dialogFormVisible" title="弹窗操作">
+      <el-form class="gva-dialog-body" :model="formData" label-position="right" label-width="80px">
     {{- range .Fields}}
          <el-form-item label="{{.FieldDesc}}:">
       {{- if eq .FieldType "bool" }}

@@ -7,14 +7,14 @@ export const dictionary = {
     },
     mutations: {
         setDictionaryMap(state, dictionaryMap) {
-            state.dictionaryMap = { ...state.dictionaryMap, ...dictionaryMap }
+            state.dictionaryMap = {...state.dictionaryMap, ...dictionaryMap }
         },
 
     },
     actions: {
         // 从后台获取动态路由
         async getDictionary({ commit, state }, type) {
-            if (state.dictionaryMap[type]) {
+            if (state.dictionaryMap[type] && state.dictionaryMap[type].length) {
                 return state.dictionaryMap[type]
             } else {
                 const res = await findSysDictionary({ type })
@@ -34,8 +34,8 @@ export const dictionary = {
             }
         }
     },
-    getters:{
-        getDictionary(state){
+    getters: {
+        getDictionary(state) {
             return state.dictionaryMap
         }
     }
