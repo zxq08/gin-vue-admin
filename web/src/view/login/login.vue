@@ -119,13 +119,15 @@ export default {
     });
     const LoginIn = (form) => store.dispatch("user/LoginIn",form);
     const login = async () => {
-      await LoginIn(form);
+      return await LoginIn(form)
     };
     const submitForm = async () => {
       ctx.$refs.loginForm.validate(async (v) => {
         if (v) {
-          login();
-          loginVefify();
+          const flag = await login();
+          if(!flag){
+            loginVefify();
+          }
         } else {
           ctx.$message({
             type: "error",
