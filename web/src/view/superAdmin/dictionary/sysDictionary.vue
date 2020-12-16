@@ -78,7 +78,7 @@
     ></el-pagination>
 
     <el-dialog :before-close="closeDialog" v-model="dialogFormVisible" title="弹窗操作">
-      <el-form ref="elForm" :model="formData" :rules="rules" size="medium" label-width="110px">
+      <el-form class="gva-dialog-body" ref="elForm" :model="formData" :rules="rules" size="medium" label-width="110px">
         <el-form-item label="字典名（中）" prop="name">
           <el-input
             v-model="formData.name"

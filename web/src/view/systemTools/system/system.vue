@@ -273,7 +273,7 @@ import { emailTest } from "@/api/email";
 import {reactive , getCurrentInstance} from "vue"
 export default {
   name: "Config",
-  setup(props) {
+  setup() {
     const { ctx } = getCurrentInstance();
     const config = reactive({
         system: {},

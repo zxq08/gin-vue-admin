@@ -59,7 +59,7 @@
     </el-table>
     <!-- 新增角色弹窗 -->
     <el-dialog :title="dialogTitle" v-model="dialogFormVisible">
-      <el-form :model="form" :rules="rules" ref="authorityForm">
+      <el-form class="gva-dialog-body" :model="form" :rules="rules" ref="authorityForm">
         <el-form-item label="父级角色" prop="parentId">
           <el-cascader
             :disabled="dialogType == 'add'"

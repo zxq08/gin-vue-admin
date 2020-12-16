@@ -169,7 +169,7 @@
     </div>
     <!-- 组件弹窗 -->
     <el-dialog title="组件内容" v-model="dialogFlag">
-      <FieldDialog v-if="dialogFlag" :dialogMiddle="dialogMiddle" ref="fieldDialog" />
+      <FieldDialog class="gva-dialog-body" v-if="dialogFlag" :dialogMiddle="dialogMiddle" ref="fieldDialog" />
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="closeDialog">取 消</el-button>

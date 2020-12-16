@@ -1,5 +1,5 @@
 import { getDict } from "@/utils/dictionary";
-import { reactive, ref } from "vue"
+import { reactive } from "vue"
 export const infoList = (listApi) => {
     const tableInfo = reactive({
         page: 1,

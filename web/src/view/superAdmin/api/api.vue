@@ -111,6 +111,7 @@
       v-model="dialogFormVisible"
     >
       <el-form
+      class="gva-dialog-body"
         :inline="true"
         :model="form"
         :rules="rules"

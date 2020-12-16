@@ -53,7 +53,7 @@
     ></el-pagination>
 
     <el-dialog v-model="addUserDialog" custom-class="user-dialog" title="新增用户">
-      <el-form :rules="rules" ref="userForm" :model="userInfo">
+      <el-form class="gva-dialog-body" :rules="rules" ref="userForm" :model="userInfo">
         <el-form-item label="用户名" label-width="80px" prop="username">
           <el-input v-model="userInfo.username"></el-input>
         </el-form-item>
