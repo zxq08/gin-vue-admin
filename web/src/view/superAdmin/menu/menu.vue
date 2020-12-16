@@ -218,6 +218,8 @@ export default {
     ]);
     const form = reactive({
       ID: 0,
+      CreatedAt:undefined,
+      UpdatedAt:undefined,
       path: "",
       name: "",
       hidden: "",
@@ -328,6 +330,8 @@ export default {
       ctx.$refs.menuForm.resetFields();
       Object.assign(form, {
         ID: 0,
+        CreatedAt:undefined,
+        UpdatedAt:undefined,
         path: "",
         name: "",
         hidden: "",

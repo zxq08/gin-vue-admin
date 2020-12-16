@@ -149,6 +149,8 @@ export default {
     const multipleSelection = reactive([]);
     const formData = reactive({
       ID: 0,
+      CreatedAt:undefined,
+      UpdatedAt:undefined,
       ip: "",
       method: "",
       path: "",

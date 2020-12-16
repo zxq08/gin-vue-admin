@@ -69,6 +69,8 @@ export default {
     const router = useRouter();
     const formData = reactive({
       ID: 0,
+      CreatedAt:undefined,
+      UpdatedAt:undefined,
       cause: "",
       startTime: new Date(),
       endTime: new Date(),

@@ -205,6 +205,8 @@ export default {
     const type = ref("");
     const form = reactive({
       ID:0,
+      CreatedAt:undefined,
+      UpdatedAt:undefined,
       path: "",
       apiGroup: "",
       method: "",
@@ -225,6 +227,8 @@ export default {
       ctx.$refs.apiForm.resetFields();
       Object.assign(form, {
         ID:0,
+        CreatedAt:undefined,
+        UpdatedAt:undefined,
         path: "",
         apiGroup: "",
         method: "",

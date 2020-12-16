@@ -170,6 +170,8 @@ export default {
     const copyForm = reactive({});
     const form = reactive({
       ID: 0,
+      CreatedAt:undefined,
+      UpdatedAt:undefined,
       authorityId: "",
       authorityName: "",
       parentId: "0",
@@ -240,6 +242,8 @@ export default {
       }
       Object.assign(form, {
         ID: 0,
+        CreatedAt:undefined,
+        UpdatedAt:undefined,
         authorityId: "",
         authorityName: "",
         parentId: "0",

@@ -139,6 +139,8 @@ export default {
     const type = ref("");
     const formData = reactive({
       ID:0,
+      CreatedAt:undefined,
+      UpdatedAt:undefined,
       label: "",
       value: 0,
       status: true,
@@ -204,6 +206,8 @@ export default {
       dialogFormVisible.value = false;
       Object.assign(formData,{
         ID:0,
+        CreatedAt:undefined,
+        UpdatedAt:undefined,
         label: "",
         value: 0,
         status: true,
