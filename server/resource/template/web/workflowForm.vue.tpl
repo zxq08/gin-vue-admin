@@ -44,8 +44,8 @@ import {
     completeWorkflowMove
 } from "@/api/workflowProcess";
 import { infoList } from "@/mixins/infoList";
-import { useStore } from "vuex";
-import { useRouter,useRoute } from "vue-router"
+import { useRouter } from "vue-router"
+import { useStore } from "vuex"
 import { ref,reactive,getCurrentInstance,computed } from "vue"
 export default {
   name: "{{.StructName}}",
@@ -68,11 +68,10 @@ export default {
       }
    },
    setup(props){
-      const {ctx} = getCurrentInstance()
-      const router = useRouter()
-      const route = useRoute()
+      const {ctx} = getCurrentInstance();
+      const router = useRouter();
+      const store = useStore();
       const { getDictFun } = infoList();
-      const type = ref("");
       {{- range .Fields}}
           {{- if .DictType }}
            const {{ .DictType }}Options = reactive([]);
