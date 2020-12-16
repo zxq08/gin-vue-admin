@@ -80,6 +80,8 @@ export default {
       {{end -}}
       const  formData = reactive({
             ID:0,
+            CreatedAt:undefined,
+            UpdatedAt:undefined,
             {{range .Fields}}
             {{- if eq .FieldType "bool" -}}
                {{.FieldJson}}:false,
@@ -173,7 +175,7 @@ export default {
          const initFunc = async () =>{
          {{ range .Fields -}}
            {{- if .DictType }}
-           Object.assign({{ .DictType }}Options,await this.getDictFun("{{.DictType}}"))
+           Object.assign({{ .DictType }}Options,await getDictFun("{{.DictType}}"))
            {{ end -}}
          {{- end }}
          if(props.business){

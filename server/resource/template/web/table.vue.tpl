@@ -42,7 +42,7 @@
       </el-form>
     </div>
     <el-table
-      :data="tableData"
+      :data="tableInfo.tableData"
       @selection-change="handleSelectionChange"
       border
       ref="multipleTable"
@@ -58,7 +58,7 @@
     {{- if .DictType}}
       <el-table-column label="{{.FieldDesc}}" prop="{{.FieldJson}}" width="120">
         <template #default="scope">
-          {{"{{"}}filterDict(scope.row.{{.FieldJson}},"{{.DictType}}"){{"}}"}}
+          {{"{{"}}filterDict(scope.row.{{.FieldJson}},{{ .DictType }}Options){{"}}"}}
         </template>
       </el-table-column>
     {{- else if eq .FieldType "bool" }}
@@ -67,7 +67,7 @@
     </el-table-column> {{- else }}
     <el-table-column label="{{.FieldDesc}}" prop="{{.FieldJson}}" width="120"></el-table-column> {{ end }}
     {{ end }}
-      <el-table-column fixed="right" label="按钮组">
+      <el-table-column fixed="right" label="按钮组"  width="200">
         <template #default="scope">
           <el-button class="table-button" @click="update{{.StructName}}Func(scope.row)" size="small" type="primary" icon="el-icon-edit">变更</el-button>
           <el-popover placement="top" width="160" v-model="scope.row.visible">
@@ -85,17 +85,17 @@
     </el-table>
 
     <el-pagination
-      :current-page="page"
-      :page-size="pageSize"
+      :current-page="tableInfo.page"
+      :page-size="tableInfo.pageSize"
       :page-sizes="[10, 30, 50, 100]"
       :style="{float:'right',padding:'20px'}"
-      :total="total"
+      :total="tableInfo.total"
       @current-change="handleCurrentChange"
       @size-change="handleSizeChange"
       layout="total, sizes, prev, pager, next, jumper"
     ></el-pagination>
 
-    <el-dialog :close-on-click-modal="false" :before-close="closeDialog" :visible="dialogFormVisible" title="弹窗操作">
+    <el-dialog :close-on-click-modal="false" :before-close="closeDialog" v-model="dialogFormVisible" title="弹窗操作">
       <el-form class="gva-dialog-body" :model="formData" label-position="right" label-width="80px">
     {{- range .Fields}}
          <el-form-item label="{{.FieldDesc}}:">
@@ -149,7 +149,7 @@ export default {
   name: "{{.StructName}}",
   setup(){
     const { ctx } = getCurrentInstance();
-    const { tableInfo, handleSizeChange, handleCurrentChange, getTableData, filterDict} = infoList(
+    const { tableInfo, handleSizeChange, handleCurrentChange, getTableData, filterDict ,getDictFunc} = infoList(
      get{{ .StructName }}List
     );
       const dialogFormVisible = ref(false);
@@ -166,6 +166,8 @@ export default {
 
       const formData = reactive({
             ID:0,
+            CreatedAt:undefined,
+            UpdatedAt:undefined,
             {{range .Fields}}
             {{- if eq .FieldType "bool" -}}
                {{.FieldJson}}:false,
@@ -238,7 +240,7 @@ export default {
       }
     const update{{.StructName}}Func = async (row) => {
       const res = await find{{.StructName}}({ ID: row.ID });
-      this.type = "update";
+      type.value = "update";
       if (res.code == 0) {
         Object.assign(formData,res.data.re{{.Abbreviation}});
         dialogFormVisible.value = true;
@@ -249,6 +251,8 @@ export default {
 
       Object.assign(formData,{
                     ID:0,
+                    CreatedAt:undefined,
+                    UpdatedAt:undefined,
                     {{range .Fields}}
                     {{- if eq .FieldType "bool" -}}
                        {{.FieldJson}}:false,
@@ -309,7 +313,7 @@ export default {
         await getTableData();
       {{ range .Fields -}}
         {{- if .DictType }}
-        Object.assign({{ .DictType }}Options,await this.getDict("{{.DictType}}"));
+        Object.assign({{ .DictType }}Options,await getDictFunc("{{.DictType}}"));
         {{ end -}}
       {{- end }}
     }
