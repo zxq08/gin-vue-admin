@@ -1,7 +1,7 @@
 <template>
   <div class="router-history">
     <el-tabs
-      :closable="!(historys.length == 1 && this.$route.name == 'dashboard')"
+      :closable="!(historys.length==1&&route.name==defaultRouter)"
       @contextmenu.prevent="openContextMenu($event)"
       @tab-click="changeTab"
       @tab-remove="removeTab"
@@ -9,9 +9,9 @@
       v-model="activeValue"
     >
       <el-tab-pane
-        :key="item.name"
+        :key="item.name + JSON.stringify(item.query)+JSON.stringify(item.params)"
         :label="item.meta.title"
-        :name="item.name"
+        :name="item.name + JSON.stringify(item.query)+JSON.stringify(item.params)"
         :tab="item"
         v-for="item in historys"
       ></el-tab-pane>
@@ -32,15 +32,17 @@
 </template>
 <script>
 import { emitter } from "@/utils/mitt";
-import { onUnmounted, reactive, ref, watch } from "vue";
+import { onUnmounted, reactive, ref, watch, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useStore } from "vuex";
 export default {
   name: "HistoryComponent",
   setup() {
+    const store = useStore()
     const route = useRoute();
     const router = useRouter();
     const historys = reactive([]);
-    const activeValue = ref("dashboard");
+    const activeValue = ref("");
     const contextMenuVisible = ref(false);
     const left = ref(0);
     const top = ref(0);
@@ -48,8 +50,13 @@ export default {
     const isMobile = ref(false);
     const rightActive = ref("");
 
+    const defaultRouter = computed(() => {
+      const userInfo = store.getters["user/userInfo"]
+      return userInfo.authority.defaultRouter
+    })
+
     const openContextMenu = (e) => {
-      if (historys.length == 1 && route.name == "dashboard") {
+      if (historys.length == 1 && route.name == defaultRouter.value) {
         return false;
       }
       if (e.srcElement.id) {
@@ -71,24 +78,35 @@ export default {
     const closeAll = () => {
       historys.length = 0;
       historys.push({
-        name: "dashboard",
+        name: defaultRouter.value,
         meta: {
-          title: "仪表盘",
+          title: "首页",
         },
+          query: {},
+          params: {}
       });
-      router.push({ name: "dashboard" });
+      router.push({ name: defaultRouter.value });
       contextMenuVisible.value = false;
       sessionStorage.setItem("historys", JSON.stringify(historys));
     };
     const closeLeft = () => {
       let right;
       const rightIndex = historys.findIndex((item) => {
-        if (item.name == rightActive.value) {
+        if (item.name +
+            JSON.stringify(item.query) +
+            JSON.stringify(item.params) ==
+          rightActive.value) {
           right = item;
         }
-        return item.name == rightActive.value;
+        return item.name +
+            JSON.stringify(item.query) +
+            JSON.stringify(item.params) ==
+          rightActive.value;
       });
-      const activeIndex = historys.findIndex((item) => item.name == activeValue.value);
+      const activeIndex = historys.findIndex((item) => item.name +
+            JSON.stringify(item.query) +
+            JSON.stringify(item.params) ==
+          activeValue.value);
       historys.splice(0, rightIndex);
       if (rightIndex > activeIndex) {
         router.push(right);
@@ -98,12 +116,23 @@ export default {
     const closeRight = () => {
       let right;
       const leftIndex = historys.findIndex((item) => {
-        if (item.name == rightActive.value) {
+        if (item.name +
+            JSON.stringify(item.query) +
+            JSON.stringify(item.params) ==
+          rightActive.value) {
           right = item;
         }
-        return item.name == rightActive.value;
+        return (
+          item.name +
+            JSON.stringify(item.query) +
+            JSON.stringify(item.params) ==
+          rightActive.value
+        );
       });
-      const activeIndex = historys.findIndex((item) => item.name == activeValue.value);
+      const activeIndex = historys.findIndex((item) => item.name +
+            JSON.stringify(item.query) +
+            JSON.stringify(item.params) ==
+          activeValue.value);
       historys.splice(leftIndex + 1, historys.length);
       if (leftIndex < activeIndex) {
         router.push(right);
@@ -114,17 +143,46 @@ export default {
       let right;
       historys.length = 0;
       const bkHistory = historys.filter((item) => {
-        if (item.name == this.rightActive) {
+        if (
+          item.name +
+            JSON.stringify(item.query) +
+            JSON.stringify(item.params) ==
+          rightActive.value
+        ) {
           right = item;
         }
-        return item.name == this.rightActive;
+        return (
+          item.name +
+            JSON.stringify(item.query) +
+            JSON.stringify(item.params) ==
+          rightActive.value
+        );
       });
       Object.assign(historys, bkHistory);
       router.push(right);
       sessionStorage.setItem("historys", JSON.stringify(historys));
     };
+
+    const isSame = (route1, route2) => {
+      if (route1.name != route2.name) {
+        return false;
+      }
+      for (let key in route1.query) {
+        if (route1.query[key] != route2.query[key]) {
+          return false;
+        }
+      }
+      for (let key in route1.params) {
+        if (route1.params[key] != route2.params[key]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+
     const setTab = (route) => {
-      if (!historys.some((item) => item.name == route.name)) {
+      if (!historys.some((item) => isSame(item,route))) {
         const obj = {};
         obj.name = route.name;
         obj.meta = route.meta;
@@ -132,17 +190,26 @@ export default {
         obj.params = route.params;
         historys.push(obj);
       }
-      activeValue.value = route.name;
+       window.sessionStorage.setItem(
+        "activeValue",
+        route.name +
+          JSON.stringify(route.query) +
+          JSON.stringify(route.params)
+      );
     };
     const changeTab = (component) => {
       const tab = component.instance.attrs.tab;
       router.push({ name: tab.name, query: tab.query, params: tab.params });
     };
     const removeTab = (tab) => {
-      const index = historys.findIndex((item) => item.name == tab);
-      if (route.name == tab) {
+      const index = historys.findIndex((item) => item.name +
+            JSON.stringify(item.query) +
+            JSON.stringify(item.params) == tab);
+      if (item.name +
+            JSON.stringify(item.query) +
+            JSON.stringify(item.params) == tab) {
         if (historys.length == 1) {
-          router.push({ name: "dashboard" });
+          router.push({ name: defaultRouter.value });
         } else {
           if (index < historys.length - 1) {
             router.push({
@@ -171,10 +238,12 @@ export default {
       });
       const initHistorys = [
         {
-          name: "dashboard",
+          name: defaultRouter.value,
           meta: {
-            title: "仪表盘",
+            title: "首页",
           },
+          query: {},
+          params: {}
         },
       ];
 
@@ -182,6 +251,12 @@ export default {
         historys,
         JSON.parse(sessionStorage.getItem("historys")) || initHistorys
       );
+      if(!window.sessionStorage.getItem("activeValue")){
+        activeValue.value = route.name + JSON.stringify(route.query)+JSON.stringify(route.params)
+      }else{
+        activeValue.value = window.sessionStorage.getItem("activeValue");
+      }
+      
       setTab(route);
     };
     initFun();
@@ -202,12 +277,13 @@ export default {
       }
     });
 
-    watch(route, (to) => {
-      const bkHistory = historys.filter((item) => !item.meta.hidden)
+    watch(route, (to, now) => {
+      const bkHistory = historys.filter((item) => !item.meta.closeTab)
       historys.length = 0
       Object.assign(historys,bkHistory)
       setTab(to);
-      sessionStorage.setItem("historys", JSON.stringify(historys));
+      sessionStorage.setItem("historys", JSON.stringify(historys))
+      activeValue.value = window.sessionStorage.getItem("activeValue")
     });
 
     return {
@@ -227,6 +303,8 @@ export default {
       setTab,
       changeTab,
       removeTab,
+      defaultRouter,
+      route
     };
   }
 };

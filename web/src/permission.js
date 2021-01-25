@@ -11,7 +11,14 @@ router.beforeEach(async(to, from, next) => {
     document.title = getPageTitle(to.meta.title)
     if (whiteList.indexOf(to.name) > -1) {
         if (token) {
-            next({ path: '/layout/dashboard' })
+            if(store.getters['router/asyncRouters'].length == 0){
+                await store.dispatch('router/SetAsyncRouter')
+                const asyncRouters = store.getters['router/asyncRouters']
+                asyncRouters.map(asyncRouter => {
+                    router.addRoute(asyncRouter)
+                })
+            }
+            next({ name: store.getters["user/userInfo"].authority.defaultRouter })
         } else {
             next()
         }
@@ -19,7 +26,7 @@ router.beforeEach(async(to, from, next) => {
         // 不在白名单中并且已经登陆的时候
         if (token) {
             // 添加flag防止多次获取动态路由和栈溢出
-            if (!asyncRouterFlag) {
+            if (!asyncRouterFlag && store.getters['router/asyncRouters'].length == 0) {
                 asyncRouterFlag++
                 await store.dispatch('router/SetAsyncRouter')
                 const asyncRouters = store.getters['router/asyncRouters']

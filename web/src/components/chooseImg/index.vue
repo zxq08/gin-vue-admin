@@ -10,7 +10,7 @@
     >
       <el-image
         class="header-img-box-list"
-        :src="item.url"
+        :src="(item.url && item.url.slice(0, 4) !== 'http')?path+item.url:item.url"
         v-for="(item, key) in picList"
         :key="key"
         @click="chooseImg(item.url, target, targetKey)"
@@ -37,6 +37,7 @@ export default {
     const { ctx } = getCurrentInstance();
     const drawer = ref(false);
     const picList = reactive([]);
+    const path = ref(path)
     const chooseImg = (url, target, targetKey) => {
       if (target && targetKey) {
         target[targetKey] = url;

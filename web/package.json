@@ -16,7 +16,7 @@
         "axios": "^0.21.0",
         "core-js": "^3.6.5",
         "echarts": "^4.9.0",
-        "element-plus": "^1.0.1-beta.8",
+        "element-plus": "^1.0.2-beta.28",
         "mitt": "^2.1.0",
         "screenfull": "^5.0.2",
         "spark-md5": "^3.0.1",

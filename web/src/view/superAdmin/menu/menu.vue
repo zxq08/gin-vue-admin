@@ -122,6 +122,12 @@
             <el-option :value="true" label="是"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="closeTab" prop="meta.closeTab" style="width:30%">
+          <el-select placeholder="是否自动关闭tab" v-model="form.meta.closeTab">
+            <el-option :value="false" label="否"></el-option>
+            <el-option :value="true" label="是"></el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
       <div class="warning">新增菜单需要在角色管理内配置权限才可使用</div>
       <div>
@@ -229,7 +235,8 @@ export default {
         title: "",
         icon: "",
         defaultMenu: false,
-        keepAlive: false
+        keepAlive: false,
+        closeTab: false
       },
       parameters: []
     });
@@ -341,7 +348,8 @@ export default {
           title: "",
           icon: "",
           defaultMenu: false,
-          keepAlive: ""
+          keepAlive: false,
+          closeTab: false
         }
       });
     };

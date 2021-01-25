@@ -24,8 +24,8 @@ export const user = {
         LoginOut(state) {
             state.userInfo = {}
             state.token = ""
-            router.push({ name: 'login', replace: true })
             sessionStorage.clear()
+            router.push({ name: 'login', replace: true })
             window.location.reload()
         },
         ResetUserInfo(state, userInfo = {}) {
@@ -35,17 +35,22 @@ export const user = {
         }
     },
     actions: {
-        async LoginIn({ commit }, loginInfo) {
+        async LoginIn({ commit, dispatch, rootGetters, getters }, loginInfo) {
             const res = await login(loginInfo)
             if (res.code == 0) {
                 commit('setUserInfo', res.data.user)
                 commit('setToken', res.data.token)
-                const redirect = router.currentRoute._value.query.redirect
-                if (redirect) {
-                    router.push({ path: redirect })
-                } else {
-                    router.push({ path: '/layout/dashboard' })
-                }
+                await dispatch('router/SetAsyncRouter', {}, { root: true })
+                const asyncRouters = rootGetters['router/asyncRouters']
+                asyncRouters.map(asyncRouter => {
+                    router.addRoute(asyncRouter)
+                })
+                // const redirect = router.currentRoute._value.query.redirect
+                // if (redirect) {
+                //     router.push({ path: redirect })
+                // } else {
+                    router.push({ name: getters["userInfo"].authority.defaultRouter })
+                // }
                 return true
             }
         },
