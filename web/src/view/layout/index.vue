@@ -24,12 +24,6 @@
           >
             <!-- :xs="8" :sm="6" :md="4" :lg="3" :xl="1" -->
             <el-row class="header-cont" :span="24">
-              <el-col :xs="2" :lg="1" :md="1" :sm="1" :xl="1">
-                <div @click="totalCollapse" class="menu-total">
-                  <i class="el-icon-s-unfold" v-if="isCollapse"></i>
-                  <i class="el-icon-s-fold" v-else></i>
-                </div>
-              </el-col>
               <el-col :xs="10" :lg="14" :md="14" :sm="9" :xl="14">
                 <el-breadcrumb class="breadcrumb" separator-class="el-icon-arrow-right">
                   <el-breadcrumb-item
@@ -38,6 +32,12 @@
                     >{{ item.meta.title }}</el-breadcrumb-item
                   >
                 </el-breadcrumb>
+              </el-col>
+              <el-col :xs="2" :lg="1" :md="1" :sm="1" :xl="1">
+                <div style="visibility:hidden" @click="totalCollapse" class="menu-total">
+                  <i class="el-icon-s-unfold" v-if="isCollapse"></i>
+                  <i class="el-icon-s-fold" v-else></i>
+                </div>
               </el-col>
               <el-col :xs="12" :lg="9" :md="9" :sm="14" :xl="9">
                 <div class="fl-right right-box">

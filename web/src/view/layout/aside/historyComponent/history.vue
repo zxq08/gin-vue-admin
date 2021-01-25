@@ -205,9 +205,9 @@ export default {
       const index = historys.findIndex((item) => item.name +
             JSON.stringify(item.query) +
             JSON.stringify(item.params) == tab);
-      if (item.name +
-            JSON.stringify(item.query) +
-            JSON.stringify(item.params) == tab) {
+      if (route.name +
+            JSON.stringify(route.query) +
+            JSON.stringify(route.params) == tab) {
         if (historys.length == 1) {
           router.push({ name: defaultRouter.value });
         } else {

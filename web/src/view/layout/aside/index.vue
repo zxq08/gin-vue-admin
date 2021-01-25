@@ -63,7 +63,9 @@ export default {
     watch(route, () => {
       active.value = route.name;
     })
-
+   emitter.on("collapse", item => {
+      isCollapse.value = item;
+    });
     onUnmounted(() => {
       emitter.off("collapse")
     })
