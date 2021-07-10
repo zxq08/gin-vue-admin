@@ -65,7 +65,7 @@ func ImportExcel(c *gin.Context) {
 func LoadExcel(c *gin.Context) {
 	menus, err := service.ParseExcel2InfoList()
 	if err != nil {
-		global.GVA_LOG.Error("加载数据失败", zap.Any("err", err))
+		global.GVA_LOG.Error("加载数据失败!", zap.Any("err", err))
 		response.FailWithMessage("加载数据失败", c)
 		return
 	}
@@ -82,7 +82,7 @@ func LoadExcel(c *gin.Context) {
 // @Security ApiKeyAuth
 // @accept multipart/form-data
 // @Produce  application/json
-// @Param fileName query fileName true "模板名称"
+// @Param fileName query string true "模板名称"
 // @Success 200
 // @Router /excel/downloadTemplate [get]
 func DownloadTemplate(c *gin.Context) {
@@ -90,7 +90,7 @@ func DownloadTemplate(c *gin.Context) {
 	filePath := global.GVA_CONFIG.Excel.Dir + fileName
 	ok, err := utils.PathExists(filePath)
 	if !ok || err != nil {
-		global.GVA_LOG.Error("文件不存在", zap.Any("err", err))
+		global.GVA_LOG.Error("文件不存在!", zap.Any("err", err))
 		response.FailWithMessage("文件不存在", c)
 		return
 	}

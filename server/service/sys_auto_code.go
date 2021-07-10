@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"gin-vue-admin/global"
 	"gin-vue-admin/model"
 	"gin-vue-admin/model/request"
@@ -97,7 +96,7 @@ func PreviewTemp(autoCode model.AutoCodeStruct) (map[string]string, error) {
 //@function: CreateTemp
 //@description: 创建代码
 //@param: model.AutoCodeStruct
-//@return: error
+//@return: err error
 
 func CreateTemp(autoCode model.AutoCodeStruct) (err error) {
 	dataList, fileList, needMkdir, err := getNeedList(&autoCode)
@@ -132,9 +131,25 @@ func CreateTemp(autoCode model.AutoCodeStruct) (err error) {
 		}
 		for _, value := range dataList { // 移动文件
 			if err := utils.FileMove(value.autoCodePath, value.autoMoveFilePath); err != nil {
-				fmt.Println(err)
 				return err
 			}
+		}
+		initializeGormFilePath := filepath.Join(global.GVA_CONFIG.AutoCode.Root,
+			global.GVA_CONFIG.AutoCode.Server, global.GVA_CONFIG.AutoCode.SInitialize, "gorm.go")
+		initializeRouterFilePath := filepath.Join(global.GVA_CONFIG.AutoCode.Root,
+			global.GVA_CONFIG.AutoCode.Server, global.GVA_CONFIG.AutoCode.SInitialize, "router.go")
+		err = utils.AutoInjectionCode(initializeGormFilePath, "MysqlTables", "model."+autoCode.StructName+"{},")
+		if err != nil {
+			return err
+		}
+		err = utils.AutoInjectionCode(initializeRouterFilePath, "Routers", "router.Init"+autoCode.StructName+"Router(PrivateGroup)")
+		if err != nil {
+			return err
+		}
+		if global.GVA_CONFIG.AutoCode.TransferRestart {
+			go func() {
+				_ = utils.Reload()
+			}()
 		}
 		return errors.New("创建代码成功并移动文件成功")
 	} else { // 打包
@@ -171,9 +186,8 @@ func GetAllTplFile(pathName string, fileList []string) ([]string, error) {
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetTables
 //@description: 获取数据库的所有表名
-//@param: pathName string
-//@param: fileList []string
-//@return: []string, error
+//@param: dbName string
+//@return: err error, TableNames []request.TableReq
 
 func GetTables(dbName string) (err error, TableNames []request.TableReq) {
 	err = global.GVA_DB.Raw("select table_name as table_name from information_schema.tables where table_schema = ?", dbName).Scan(&TableNames).Error
@@ -183,9 +197,7 @@ func GetTables(dbName string) (err error, TableNames []request.TableReq) {
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetDB
 //@description: 获取数据库的所有数据库名
-//@param: pathName string
-//@param: fileList []string
-//@return: []string, error
+//@return: err error, DBNames []request.DBReq
 
 func GetDB() (err error, DBNames []request.DBReq) {
 	err = global.GVA_DB.Raw("SELECT SCHEMA_NAME AS `database` FROM INFORMATION_SCHEMA.SCHEMATA;").Scan(&DBNames).Error
@@ -195,9 +207,8 @@ func GetDB() (err error, DBNames []request.DBReq) {
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetDB
 //@description: 获取指定数据库和指定数据表的所有字段名,类型值等
-//@param: pathName string
-//@param: fileList []string
-//@return: []string, error
+//@param: tableName string, dbName string
+//@return: err error, Columns []request.ColumnReq
 
 func GetColumn(tableName string, dbName string) (err error, Columns []request.ColumnReq) {
 	err = global.GVA_DB.Raw("SELECT COLUMN_NAME column_name,DATA_TYPE data_type,CASE DATA_TYPE WHEN 'longtext' THEN c.CHARACTER_MAXIMUM_LENGTH WHEN 'varchar' THEN c.CHARACTER_MAXIMUM_LENGTH WHEN 'double' THEN CONCAT_WS( ',', c.NUMERIC_PRECISION, c.NUMERIC_SCALE ) WHEN 'decimal' THEN CONCAT_WS( ',', c.NUMERIC_PRECISION, c.NUMERIC_SCALE ) WHEN 'int' THEN c.NUMERIC_PRECISION WHEN 'bigint' THEN c.NUMERIC_PRECISION ELSE '' END AS data_type_long,COLUMN_COMMENT column_comment FROM INFORMATION_SCHEMA.COLUMNS c WHERE table_name = ? AND table_schema = ?", tableName, dbName).Scan(&Columns).Error
@@ -212,7 +223,6 @@ func GetColumn(tableName string, dbName string) (err error, Columns []request.Co
 //@return: null
 
 func addAutoMoveFile(data *tplData) {
-	dir := filepath.Base(filepath.Dir(data.autoCodePath))
 	base := filepath.Base(data.autoCodePath)
 	fileSlice := strings.Split(data.autoCodePath, string(os.PathSeparator))
 	n := len(fileSlice)
@@ -221,25 +231,31 @@ func addAutoMoveFile(data *tplData) {
 	}
 	if strings.Contains(fileSlice[1], "server") {
 		if strings.Contains(fileSlice[n-2], "router") {
-			data.autoMoveFilePath = filepath.Join(dir, base)
+			data.autoMoveFilePath = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server,
+				global.GVA_CONFIG.AutoCode.SRouter, base)
 		} else if strings.Contains(fileSlice[n-2], "api") {
-			data.autoMoveFilePath = filepath.Join(dir, "v1", base)
+			data.autoMoveFilePath = filepath.Join(global.GVA_CONFIG.AutoCode.Root,
+				global.GVA_CONFIG.AutoCode.Server, global.GVA_CONFIG.AutoCode.SApi, base)
 		} else if strings.Contains(fileSlice[n-2], "service") {
-			data.autoMoveFilePath = filepath.Join(dir, base)
+			data.autoMoveFilePath = filepath.Join(global.GVA_CONFIG.AutoCode.Root,
+				global.GVA_CONFIG.AutoCode.Server, global.GVA_CONFIG.AutoCode.SService, base)
 		} else if strings.Contains(fileSlice[n-2], "model") {
-			data.autoMoveFilePath = filepath.Join(dir, base)
+			data.autoMoveFilePath = filepath.Join(global.GVA_CONFIG.AutoCode.Root,
+				global.GVA_CONFIG.AutoCode.Server, global.GVA_CONFIG.AutoCode.SModel, base)
 		} else if strings.Contains(fileSlice[n-2], "request") {
-			data.autoMoveFilePath = filepath.Join("model", dir, base)
+			data.autoMoveFilePath = filepath.Join(global.GVA_CONFIG.AutoCode.Root,
+				global.GVA_CONFIG.AutoCode.Server, global.GVA_CONFIG.AutoCode.SRequest, base)
 		}
 	} else if strings.Contains(fileSlice[1], "web") {
 		if strings.Contains(fileSlice[n-1], "js") {
-			data.autoMoveFilePath = filepath.Join("../", "web", "src", dir, base)
-		} else if strings.Contains(fileSlice[n-2], "workflowForm") {
-			data.autoMoveFilePath = filepath.Join("../", "web", "src", "view", filepath.Base(filepath.Dir(filepath.Dir(data.autoCodePath))), strings.TrimSuffix(base, filepath.Ext(base))+"WorkflowForm.vue")
+			data.autoMoveFilePath = filepath.Join(global.GVA_CONFIG.AutoCode.Root,
+				global.GVA_CONFIG.AutoCode.Web, global.GVA_CONFIG.AutoCode.WApi, base)
 		} else if strings.Contains(fileSlice[n-2], "form") {
-			data.autoMoveFilePath = filepath.Join("../", "web", "src", "view", filepath.Base(filepath.Dir(filepath.Dir(data.autoCodePath))), strings.TrimSuffix(base, filepath.Ext(base))+"Form.vue")
+			data.autoMoveFilePath = filepath.Join(global.GVA_CONFIG.AutoCode.Root,
+				global.GVA_CONFIG.AutoCode.Web, global.GVA_CONFIG.AutoCode.WForm, filepath.Base(filepath.Dir(filepath.Dir(data.autoCodePath))), strings.TrimSuffix(base, filepath.Ext(base))+"Form.vue")
 		} else if strings.Contains(fileSlice[n-2], "table") {
-			data.autoMoveFilePath = filepath.Join("../", "web", "src", "view", filepath.Base(filepath.Dir(filepath.Dir(data.autoCodePath))), base)
+			data.autoMoveFilePath = filepath.Join(global.GVA_CONFIG.AutoCode.Root,
+				global.GVA_CONFIG.AutoCode.Web, global.GVA_CONFIG.AutoCode.WTable, filepath.Base(filepath.Dir(filepath.Dir(data.autoCodePath))), base)
 		}
 	}
 }
@@ -249,7 +265,7 @@ func addAutoMoveFile(data *tplData) {
 //@function: CreateApi
 //@description: 自动创建api数据,
 //@param: a *model.AutoCodeStruct
-//@return: error
+//@return: err error
 
 func AutoCreateApi(a *model.AutoCodeStruct) (err error) {
 	var apiList = []model.SysApi{
@@ -305,6 +321,11 @@ func AutoCreateApi(a *model.AutoCodeStruct) (err error) {
 }
 
 func getNeedList(autoCode *model.AutoCodeStruct) (dataList []tplData, fileList []string, needMkdir []string, err error) {
+	// 去除所有空格
+	utils.TrimSpace(autoCode)
+	for _, field := range autoCode.Fields {
+		utils.TrimSpace(field)
+	}
 	// 获取 basePath 文件夹下所有tpl文件
 	tplFileList, err := GetAllTplFile(basePath, nil)
 	if err != nil {
@@ -339,8 +360,15 @@ func getNeedList(autoCode *model.AutoCodeStruct) (dataList []tplData, fileList [
 			origFileName := strings.TrimSuffix(trimBase[lastSeparator+1:], ".tpl")
 			firstDot := strings.Index(origFileName, ".")
 			if firstDot != -1 {
+				var fileName string
+				if origFileName[firstDot:] !=".go"{
+					fileName = autoCode.PackageName+origFileName[firstDot:]
+				}else{
+					fileName = autoCode.HumpPackageName+origFileName[firstDot:]
+				}
+
 				dataList[index].autoCodePath = filepath.Join(autoPath, trimBase[:lastSeparator], autoCode.PackageName,
-					origFileName[:firstDot], autoCode.PackageName+origFileName[firstDot:])
+					origFileName[:firstDot], fileName)
 			}
 		}
 

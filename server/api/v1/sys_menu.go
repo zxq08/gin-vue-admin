@@ -7,6 +7,7 @@ import (
 	"gin-vue-admin/model/response"
 	"gin-vue-admin/service"
 	"gin-vue-admin/utils"
+
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -23,6 +24,9 @@ func GetMenu(c *gin.Context) {
 		global.GVA_LOG.Error("获取失败!", zap.Any("err", err))
 		response.FailWithMessage("获取失败", c)
 	} else {
+		if menus == nil {
+			menus = []model.SysMenu{}
+		}
 		response.OkWithDetailed(response.SysMenusResponse{Menus: menus}, "获取成功", c)
 	}
 }
@@ -132,7 +136,7 @@ func DeleteBaseMenu(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if err := service.DeleteBaseMenu(menu.Id); err != nil {
+	if err := service.DeleteBaseMenu(menu.ID); err != nil {
 		global.GVA_LOG.Error("删除失败!", zap.Any("err", err))
 		response.FailWithMessage("删除失败", c)
 	} else {
@@ -182,7 +186,7 @@ func GetBaseMenuById(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if err, menu := service.GetBaseMenuById(idInfo.Id); err != nil {
+	if err, menu := service.GetBaseMenuById(idInfo.ID); err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Any("err", err))
 		response.FailWithMessage("获取失败", c)
 	} else {
@@ -214,6 +218,6 @@ func GetMenuList(c *gin.Context) {
 			Total:    total,
 			Page:     pageInfo.Page,
 			PageSize: pageInfo.PageSize,
-		},"获取成功", c)
+		}, "获取成功", c)
 	}
 }

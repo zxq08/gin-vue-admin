@@ -5,11 +5,12 @@ import (
 	"gin-vue-admin/global"
 	"gin-vue-admin/model"
 	"gin-vue-admin/model/request"
-	"github.com/casbin/casbin/util"
 	"github.com/casbin/casbin/v2"
+	"github.com/casbin/casbin/v2/util"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	_ "github.com/go-sql-driver/mysql"
 	"strings"
+	"sync"
 )
 
 //@author: [piexlmax](https://github.com/piexlmax)
@@ -58,7 +59,6 @@ func UpdateCasbinApi(oldPath string, newPath string, oldMethod string, newMethod
 //@param: authorityId string
 //@return: pathMaps []request.CasbinInfo
 
-
 func GetPolicyPathByAuthorityId(authorityId string) (pathMaps []request.CasbinInfo) {
 	e := Casbin()
 	list := e.GetFilteredPolicy(0, authorityId)
@@ -89,13 +89,19 @@ func ClearCasbin(v int, p ...string) bool {
 //@description: 持久化到数据库  引入自定义规则
 //@return: *casbin.Enforcer
 
-func Casbin() *casbin.Enforcer {
-	admin := global.GVA_CONFIG.Mysql
-	a, _ := gormadapter.NewAdapter(global.GVA_CONFIG.System.DbType, admin.Username+":"+admin.Password+"@("+admin.Path+")/"+admin.Dbname, true)
-	e, _ := casbin.NewEnforcer(global.GVA_CONFIG.Casbin.ModelPath, a)
-	e.AddFunction("ParamsMatch", ParamsMatchFunc)
-	_ = e.LoadPolicy()
-	return e
+var (
+	syncedEnforcer *casbin.SyncedEnforcer
+	once           sync.Once
+)
+
+func Casbin() *casbin.SyncedEnforcer {
+	once.Do(func() {
+		a, _ := gormadapter.NewAdapterByDB(global.GVA_DB)
+		syncedEnforcer, _ = casbin.NewSyncedEnforcer(global.GVA_CONFIG.Casbin.ModelPath, a)
+		syncedEnforcer.AddFunction("ParamsMatch", ParamsMatchFunc)
+	})
+	_ = syncedEnforcer.LoadPolicy()
+	return syncedEnforcer
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)

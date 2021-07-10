@@ -34,12 +34,13 @@ func DeleteBaseMenu(id float64) (err error) {
 //@function: UpdateBaseMenu
 //@description: 更新路由
 //@param: menu model.SysBaseMenu
-//@return:err error
+//@return: err error
 
 func UpdateBaseMenu(menu model.SysBaseMenu) (err error) {
 	var oldMenu model.SysBaseMenu
 	upDateMap := make(map[string]interface{})
 	upDateMap["keep_alive"] = menu.KeepAlive
+	upDateMap["close_tab"] = menu.CloseTab
 	upDateMap["default_menu"] = menu.DefaultMenu
 	upDateMap["parent_id"] = menu.ParentId
 	upDateMap["path"] = menu.Path

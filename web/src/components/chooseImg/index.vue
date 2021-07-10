@@ -1,15 +1,15 @@
 <template>
   <el-drawer title="媒体库" :visible.sync="drawer">
-    <div style="display:flex;justify-content:space-around;flex-wrap:wrap;padding-top:40px">
+    <div class="media">
       <el-image
-        class="header-img-box-list"
-        :src="(item.url && item.url.slice(0, 4) !== 'http')?path+item.url:item.url"
         v-for="(item,key) in picList"
         :key="key"
+        class="header-img-box-list"
+        :src="(item.url && item.url.slice(0, 4) !== 'http')?path+item.url:item.url"
         @click.native="chooseImg(item.url,target,targetKey)"
       >
         <div slot="error" class="header-img-box-list">
-          <i class="el-icon-picture-outline"></i>
+          <i class="el-icon-picture-outline" />
         </div>
       </el-image>
     </div>
@@ -18,44 +18,57 @@
 
 <script>
 const path = process.env.VUE_APP_BASE_API
-import { getFileList } from "@/api/fileUploadAndDownload";
+import { getFileList } from '@/api/fileUploadAndDownload'
 export default {
   props: {
-    target: [Object],
-    targetKey: [String]
+    target: {
+      type: Object,
+      default: null
+    },
+    targetKey: {
+      type: String,
+      default: ''
+    }
   },
   data() {
     return {
       drawer: false,
       picList: [],
-      path:path
-    };
+      path: path
+    }
   },
   methods: {
     chooseImg(url, target, targetKey) {
-      if(target&&targetKey){
-        target[targetKey] = url;
+      if (target && targetKey) {
+        target[targetKey] = url
       }
-      this.$emit("enter-img", url);
-      this.drawer = false;
+      this.$emit('enter-img', url)
+      this.drawer = false
     },
     async open() {
-      const res = await getFileList({ page: 1, pageSize: 9999 });
-      this.picList = res.data.list;
-      this.drawer = true;
+      const res = await getFileList({ page: 1, pageSize: 9999 })
+      this.picList = res.data.list
+      this.drawer = true
     }
   }
-};
+}
 </script>
 
 <style lang="scss">
-.header-img-box-list {
-  width: 180px;
-  height: 180px;
-  border: 1px dashed #ccc;
-  border-radius: 20px;
-  text-align: center;
-  line-height: 180px;
-  cursor: pointer;
+.media{
+  display:flex;
+  flex-wrap:wrap;
+  .header-img-box-list {
+    margin-top: 20px;
+    width: 120px;
+    margin-left: 20px;
+    height: 120px;
+    border: 1px dashed #ccc;
+    border-radius: 20px;
+    text-align: center;
+    line-height: 180px;
+    cursor: pointer;
 }
+}
+
 </style>

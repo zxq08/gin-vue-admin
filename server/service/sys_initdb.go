@@ -3,10 +3,14 @@ package service
 import (
 	"database/sql"
 	"fmt"
+	"gin-vue-admin/config"
 	"gin-vue-admin/global"
 	"gin-vue-admin/model"
 	"gin-vue-admin/model/request"
 	"gin-vue-admin/source"
+	"gin-vue-admin/utils"
+	"path/filepath"
+
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -15,11 +19,13 @@ import (
 //@author: [songzhibin97](https://github.com/songzhibin97)
 //@function: writeConfig
 //@description: 回写配置
-//@param:
+//@param: viper *viper.Viper, mysql config.Mysql
 //@return: error
 
-func writeConfig(viper *viper.Viper, conf map[string]interface{}) error {
-	for k, v := range conf {
+func writeConfig(viper *viper.Viper, mysql config.Mysql) error {
+	global.GVA_CONFIG.Mysql = mysql
+	cs := utils.StructToMap(global.GVA_CONFIG)
+	for k, v := range cs {
 		viper.Set(k, v)
 	}
 	return viper.WriteConfig()
@@ -36,7 +42,12 @@ func createTable(dsn string, driver string, createSql string) error {
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+
+		}
+	}(db)
 	if err = db.Ping(); err != nil {
 		return err
 	}
@@ -57,10 +68,11 @@ func initDB(InitDBFunctions ...model.InitDBFunc) (err error) {
 //@author: [songzhibin97](https://github.com/songzhibin97)
 //@function: InitDB
 //@description: 创建数据库并初始化
-//@param: authorityId string
-//@return: err error, treeMap map[string][]model.SysMenu
+//@param: conf request.InitDB
+//@return: error
 
 func InitDB(conf request.InitDB) error {
+
 	if conf.Host == "" {
 		conf.Host = "127.0.0.1"
 	}
@@ -69,27 +81,24 @@ func InitDB(conf request.InitDB) error {
 		conf.Port = "3306"
 	}
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/", conf.UserName, conf.Password, conf.Host, conf.Port)
-	fmt.Println(dsn)
-	createSql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;", conf.DBName)
+	createSql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;", conf.DBName)
 	if err := createTable(dsn, "mysql", createSql); err != nil {
 		return err
 	}
-	setting := map[string]interface{}{
-		"mysql.path":     fmt.Sprintf("%s:%s", conf.Host, conf.Port),
-		"mysql.db-name":  conf.DBName,
-		"mysql.username": conf.UserName,
-		"mysql.password": conf.Password,
-		"mysql.config":   "charset=utf8mb4&parseTime=True&loc=Local",
+
+	MysqlConfig := config.Mysql{
+		Path:     fmt.Sprintf("%s:%s", conf.Host, conf.Port),
+		Dbname:   conf.DBName,
+		Username: conf.UserName,
+		Password: conf.Password,
+		Config:   "charset=utf8mb4&parseTime=True&loc=Local",
 	}
-	if err := writeConfig(global.GVA_VP, setting); err != nil {
-		return err
-	}
-	m := global.GVA_CONFIG.Mysql
-	if m.Dbname == "" {
+
+	if MysqlConfig.Dbname == "" {
 		return nil
 	}
 
-	linkDns := m.Username + ":" + m.Password + "@tcp(" + m.Path + ")/" + m.Dbname + "?" + m.Config
+	linkDns := MysqlConfig.Username + ":" + MysqlConfig.Password + "@tcp(" + MysqlConfig.Path + ")/" + MysqlConfig.Dbname + "?" + MysqlConfig.Config
 	mysqlConfig := mysql.Config{
 		DSN:                       linkDns, // DSN data source name
 		DefaultStringSize:         191,     // string 类型字段的默认长度
@@ -99,14 +108,11 @@ func InitDB(conf request.InitDB) error {
 		SkipInitializeWithVersion: false,   // 根据版本自动配置
 	}
 	if db, err := gorm.Open(mysql.New(mysqlConfig), &gorm.Config{DisableForeignKeyConstraintWhenMigrating: true}); err != nil {
-		//global.GVA_LOG.Error("MySQL启动异常", zap.Any("err", err))
-		//os.Exit(0)
-		//return nil
 		return nil
 	} else {
 		sqlDB, _ := db.DB()
-		sqlDB.SetMaxIdleConns(m.MaxIdleConns)
-		sqlDB.SetMaxOpenConns(m.MaxOpenConns)
+		sqlDB.SetMaxIdleConns(MysqlConfig.MaxIdleConns)
+		sqlDB.SetMaxOpenConns(MysqlConfig.MaxOpenConns)
 		global.GVA_DB = db
 	}
 
@@ -125,15 +131,9 @@ func InitDB(conf request.InitDB) error {
 		model.ExaSimpleUploader{},
 		model.ExaCustomer{},
 		model.SysOperationRecord{},
-		model.WorkflowProcess{},
-		model.WorkflowNode{},
-		model.WorkflowEdge{},
-		model.WorkflowStartPoint{},
-		model.WorkflowEndPoint{},
-		model.WorkflowMove{},
-		model.ExaWfLeave{},
 	)
 	if err != nil {
+		global.GVA_DB = nil
 		return err
 	}
 	err = initDB(
@@ -147,10 +147,14 @@ func InitDB(conf request.InitDB) error {
 		source.Dictionary,
 		source.DictionaryDetail,
 		source.File,
-		source.BaseMenu,
-		source.Workflow)
+		source.BaseMenu)
 	if err != nil {
+		global.GVA_DB = nil
 		return err
 	}
+	if err = writeConfig(global.GVA_VP, MysqlConfig); err != nil {
+		return err
+	}
+	global.GVA_CONFIG.AutoCode.Root, _ = filepath.Abs("..")
 	return nil
 }
