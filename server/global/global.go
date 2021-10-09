@@ -1,15 +1,16 @@
 package global
 
 import (
-	"gin-vue-admin/utils/timer"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils/timer"
+	"github.com/songzhibin97/gkit/cache/local_cache"
 
 	"golang.org/x/sync/singleflight"
 
 	"go.uber.org/zap"
 
-	"gin-vue-admin/config"
+	"github.com/flipped-aurora/gin-vue-admin/server/config"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
@@ -23,4 +24,6 @@ var (
 	GVA_LOG                 *zap.Logger
 	GVA_Timer               timer.Timer = timer.NewTimerTask()
 	GVA_Concurrency_Control             = &singleflight.Group{}
+
+	BlackCache local_cache.Cache
 )

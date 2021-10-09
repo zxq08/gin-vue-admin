@@ -1,10 +1,10 @@
 <template>
   <div>
-    <el-scrollbar style="height:calc(100vh - 64px)">
+    <el-scrollbar style="height:calc(100vh - 60px)">
       <transition :duration="{ enter: 800, leave: 100 }" mode="out-in" name="el-fade-in-linear">
         <el-menu
           :collapse="isCollapse"
-          :collapse-transition="true"
+          :collapse-transition="false"
           :default-active="active"
           :background-color="sideMode"
           :active-text-color="activeColor"
@@ -24,7 +24,9 @@
 
 <script>
 import { mapGetters, mapMutations } from 'vuex'
-import AsideComponent from '@/view/layout/aside/asideComponent'
+import AsideComponent from '@/view/layout/aside/asideComponent/index.vue'
+import { emitter } from '@/utils/bus.js'
+
 export default {
   name: 'Aside',
   components: {
@@ -52,20 +54,20 @@ export default {
       this.isCollapse = !this.isCollapse
     }
 
-    this.$bus.on('collapse', item => {
+    emitter.on('collapse', item => {
       this.isCollapse = item
     })
   },
-  beforeDestroy() {
-    this.$bus.off('collapse')
+  beforeUnmount() {
+    emitter.off('collapse')
   },
   methods: {
     ...mapMutations('history', ['addHistory']),
     selectMenuItem(index, _, ele) {
       const query = {}
       const params = {}
-      ele.route.parameters &&
-      ele.route.parameters.map(item => {
+      ele?.route?.parameters &&
+      ele.route.parameters.forEach(item => {
         if (item.type === 'query') {
           query[item.key] = item.value
         } else {
@@ -84,13 +86,13 @@ export default {
 </script>
 
 <style lang="scss">
-.el-submenu__title,.el-menu-item{
+.el-sub-menu__title,.el-menu-item{
   i{
     color: inherit !important;
   }
 }
 
-.el-submenu__title:hover,.el-menu-item:hover{
+.el-sub-menu__title:hover,.el-menu-item:hover{
   i{
     color: inherit !important;
   }

@@ -1,7 +1,7 @@
 package source
 
 import (
-	"gin-vue-admin/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/gookit/color"
 	"gorm.io/gorm"
 )
@@ -36,9 +36,10 @@ var authorityMenus = []AuthorityMenus{
 	{"888", 18},
 	{"888", 19},
 	{"888", 20},
-	{"888", 21},
 	{"888", 22},
 	{"888", 23},
+	{"888", 24},
+	{"888", 25},
 	{"8881", 1},
 	{"8881", 2},
 	{"8881", 8},

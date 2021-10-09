@@ -3,13 +3,28 @@ import { asyncRouterHandle } from '@/utils/asyncRouter'
 import { asyncMenu } from '@/api/menu'
 
 const routerList = []
+const keepAliveRouters = []
+
 const formatRouter = (routes) => {
-  routes && routes.map(item => {
-    if ((!item.children || item.children.every(ch => ch.hidden)) && item.name !== '404') {
+  routes && routes.forEach(item => {
+    if ((!item.children || item.children.every(ch => ch.hidden)) && item.name !== '404' && !item.hidden) {
       routerList.push({ label: item.meta.title, value: item.name })
     }
+    item.meta.hidden = item.hidden
     if (item.children && item.children.length > 0) {
       formatRouter(item.children)
+    }
+  })
+}
+
+const KeepAliveFilter = (routes) => {
+  routes && routes.forEach(item => {
+    // 子菜单中有 keep-alive 的，父菜单也必须 keep-alive，否则无效。这里将子菜单中有 keep-alive 的父菜单也加入。
+    if ((item.children && item.children.some(ch => ch.meta.keepAlive) || item.meta.keepAlive)) {
+      item.component().then(val => { keepAliveRouters.push(val.default.name) })
+    }
+    if (item.children && item.children.length > 0) {
+      KeepAliveFilter(item.children)
     }
   })
 }
@@ -18,7 +33,8 @@ export const router = {
   namespaced: true,
   state: {
     asyncRouters: [],
-    routerList: routerList
+    routerList: routerList,
+    keepAliveRouters: keepAliveRouters
   },
   mutations: {
     setRouterList(state, routerList) {
@@ -27,6 +43,10 @@ export const router = {
     // 设置动态路由
     setAsyncRouter(state, asyncRouters) {
       state.asyncRouters = asyncRouters
+    },
+    // 设置需要缓存的路由
+    setKeepAliveRouters(state, keepAliveRouters) {
+      state.keepAliveRouters = keepAliveRouters
     }
   },
   actions: {
@@ -42,28 +62,28 @@ export const router = {
         children: []
       }]
       const asyncRouterRes = await asyncMenu()
-      if (asyncRouterRes.code !== 0) {
-        return
-      }
-      const asyncRouter = asyncRouterRes.data && asyncRouterRes.data.menus
+      const asyncRouter = asyncRouterRes.data.menus
       asyncRouter.push({
         path: '404',
         name: '404',
         hidden: true,
         meta: {
-          title: '迷路了*。*'
+          title: '迷路了*。*',
         },
         component: 'view/error/index.vue'
       })
       formatRouter(asyncRouter)
       baseRouter[0].children = asyncRouter
       baseRouter.push({
-        path: '*',
+        path: '/:catchAll(.*)',
         redirect: '/layout/404'
+
       })
       asyncRouterHandle(baseRouter)
+      KeepAliveFilter(asyncRouter)
       commit('setAsyncRouter', baseRouter)
       commit('setRouterList', routerList)
+      commit('setKeepAliveRouters', keepAliveRouters)
       return true
     }
   },
@@ -75,8 +95,8 @@ export const router = {
     routerList(state) {
       return state.routerList
     },
-    defaultRouter(state) {
-      return state.defaultRouter
+    keepAliveRouters(state) {
+      return state.keepAliveRouters
     }
   }
 }

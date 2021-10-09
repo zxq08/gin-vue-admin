@@ -20,19 +20,23 @@
       </div>
     </transition>
     <div
-      :style="{display:'inline-block',float:'right',width:'31px',textAlign:'left',fontSize:'16px',paddingTop:'2px'}"
+      v-if="btnShow"
       class="user-box"
     >
-      <i :style="{cursor:'pointer',paddingLeft:'1px'}" class="el-icon-refresh reload" :class="[reload ? 'reloading' : '']" @click="handleReload" />
+      <i class="el-icon-refresh reload" :class="[reload ? 'reloading' : '']" @click="handleReload" />
     </div>
-    <div :style="{display:'inline-block',float:'right'}" class="user-box">
-      <i :style="{cursor:'pointer'}" class="el-icon-search search-icon" @click="showSearch()" />
+    <div
+      v-if="btnShow"
+      class="user-box"
+    >
+      <i class="el-icon-search search-icon" @click="showSearch()" />
     </div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import { emitter } from '@/utils/bus.js'
 
 export default {
   name: 'SearchComponent',
@@ -40,12 +44,14 @@ export default {
     return {
       value: '',
       show: false,
+      btnShow: true,
       reload: false
     }
   },
   computed: {
-    ...mapGetters('router', ['routerList'])
+    ...mapGetters('router', ['routerList']),
   },
+
   methods: {
     changeRouter() {
       this.$router.push({ name: this.value })
@@ -53,8 +59,12 @@ export default {
     },
     hiddenSearch() {
       this.show = false
+      setTimeout(() => {
+        this.btnShow = true
+      }, 500)
     },
     showSearch() {
+      this.btnShow = false
       this.show = true
       this.$nextTick(() => {
         this.$refs['search-input'].focus()
@@ -62,7 +72,7 @@ export default {
     },
     handleReload() {
       this.reload = true
-      this.$bus.$emit('reload')
+      emitter.emit('reload')
       setTimeout(() => {
         this.reload = false
       }, 500)
@@ -72,10 +82,7 @@ export default {
 </script>
 <style scoped lang="scss">
 .reload{
-  font-size: 17px;
-  &:hover{
-    transform: scale(1.02)
-  }
+  font-size: 18px;
 }
 
 .reloading{

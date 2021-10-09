@@ -1,4 +1,6 @@
 import { getDict } from '@/utils/dictionary'
+import { formatTimeToStr } from '@/utils/date'
+
 export default {
   data() {
     return {
@@ -10,6 +12,21 @@ export default {
     }
   },
   methods: {
+    formatBoolean: function(bool) {
+      if (bool !== null) {
+        return bool ? '是' : '否'
+      } else {
+        return ''
+      }
+    },
+    formatDate: function(time) {
+      if (time !== null && time !== '') {
+        var date = new Date(time)
+        return formatTimeToStr(date, 'yyyy-MM-dd hh:mm:ss')
+      } else {
+        return ''
+      }
+    },
     filterDict(value, type) {
       const rowLabel = this[type + 'Options'] && this[type + 'Options'].filter(item => item.value === value)
       return rowLabel && rowLabel[0] && rowLabel[0].label
@@ -27,14 +44,18 @@ export default {
       this.page = val
       this.getTableData()
     },
-    async getTableData(page = this.page, pageSize = this.pageSize) {
-      const table = await this.listApi({ page, pageSize, ...this.searchInfo })
+    // @params beforeFunc function 请求发起前执行的函数 默认为空函数
+    // @params afterFunc function 请求完成后执行的函数 默认为空函数
+    async getTableData(beforeFunc = () => {}, afterFunc = () => {}) {
+      beforeFunc()
+      const table = await this.listApi({ page: this.page, pageSize: this.pageSize, ...this.searchInfo })
       if (table.code === 0) {
         this.tableData = table.data.list
         this.total = table.data.total
         this.page = table.data.page
         this.pageSize = table.data.pageSize
       }
+      afterFunc()
     }
   }
 }

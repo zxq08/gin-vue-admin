@@ -1,8 +1,7 @@
-import { login } from '@/api/user'
+import { login, getUserInfo, setUserInfo } from '@/api/user'
 import { jsonInBlacklist } from '@/api/jwt'
 import router from '@/router/index'
-import { setUserInfo } from '@/api/user'
-import { Message } from 'element-ui'
+import { ElMessage } from 'element-plus'
 
 export const user = {
   namespaced: true,
@@ -11,12 +10,12 @@ export const user = {
       uuid: '',
       nickName: '',
       headerImg: '',
-      authority: '',
+      authority: {},
       sideMode: 'dark',
-      activeColor: '#1890ff',
+      activeColor: '#4D70FF',
       baseColor: '#fff'
     },
-    token: ''
+    token: '',
   },
   mutations: {
     setUserInfo(state, userInfo) {
@@ -45,17 +44,18 @@ export const user = {
         ...userInfo
       }
     },
-    ChangeActiveColor: async(state, val) => {
-      state.userInfo.activeColor = val
-    },
-    ChangeSideMode: async(state, val) => {
+    ChangeSideMode: (state, val) => {
       state.userInfo.sideMode = val
     },
-    ChangeBaseColor: (state, val) => {
-      state.userInfo.baseColor = val
-    }
   },
   actions: {
+    async GetUserInfo({ commit }) {
+      const res = await getUserInfo()
+      if (res.code === 0) {
+        commit('setUserInfo', res.data.userInfo)
+      }
+      return res
+    },
     async LoginIn({ commit, dispatch, rootGetters, getters }, loginInfo) {
       const res = await login(loginInfo)
       if (res.code === 0) {
@@ -63,7 +63,9 @@ export const user = {
         commit('setToken', res.data.token)
         await dispatch('router/SetAsyncRouter', {}, { root: true })
         const asyncRouters = rootGetters['router/asyncRouters']
-        router.addRoutes(asyncRouters)
+        asyncRouters.forEach(asyncRouter => {
+          router.addRoute(asyncRouter)
+        })
         // const redirect = router.history.current.query.redirect
         // console.log(redirect)
         // if (redirect) {
@@ -80,36 +82,16 @@ export const user = {
         commit('LoginOut')
       }
     },
-    async changeActiveColor({ commit, state }, data) {
-      const res = await setUserInfo({ activeColor: data, ID: state.userInfo.ID })
-      if (res.code === 0) {
-        commit('ChangeActiveColor', data)
-        Message({
-          type: 'success',
-          message: '设置成功'
-        })
-      }
-    },
     async changeSideMode({ commit, state }, data) {
       const res = await setUserInfo({ sideMode: data, ID: state.userInfo.ID })
       if (res.code === 0) {
         commit('ChangeSideMode', data)
-        Message({
+        ElMessage({
           type: 'success',
           message: '设置成功'
         })
       }
     },
-    async changeBaseColor({ commit, state }, data) {
-      const res = await setUserInfo({ baseColor: data, ID: state.userInfo.ID })
-      if (res.code === 0) {
-        commit('ChangeBaseColor', data)
-        Message({
-          type: 'success',
-          message: '设置成功'
-        })
-      }
-    }
   },
   getters: {
     userInfo(state) {
@@ -141,10 +123,9 @@ export const user = {
     },
     activeColor(state) {
       if (state.userInfo.sideMode === 'dark' || state.userInfo.sideMode === 'light') {
-        return '#1890ff'
+        return '#4D70FF'
       }
       return state.userInfo.activeColor
     }
-
   }
 }
