@@ -10,7 +10,7 @@
       >
         <template #error>
           <div class="header-img-box-list">
-            <i class="el-icon-picture-outline" />
+            <el-icon><picture /></el-icon>
           </div>
         </template>
       </el-image>
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-const path = process.env.VUE_APP_BASE_API
+const path = import.meta.env.VITE_BASE_API
 import { getFileList } from '@/api/fileUploadAndDownload'
 export default {
   props: {

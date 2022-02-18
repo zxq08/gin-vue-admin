@@ -568,7 +568,6 @@ li {
         -webkit-transition: width .2s;
         transition: width .2s;
         width: $width-aside;
-        background-color: $bg-aside;
         height: 100%;
         position: fixed;
         font-size: 0;
@@ -583,7 +582,6 @@ li {
         .tilte {
             min-height: $height-aside-tilte;
             line-height: $height-aside-tilte;
-            background: $bg-aside;
             text-align: center;
             transition: all 0.3s;
             .logoimg {
@@ -610,19 +608,13 @@ li {
                 padding: 0 15px !important;
             }
         }
-        .el-menu-vertical {
-            background-color: $bg-aside;
-        }
         .el-sub-menu {
-            background-color: $bg-aside;
             .el-menu {
                 .el-menu-item {
-                    background-color: #000408;
                     height: 44px;
                     line-height: 44px;
                 }
                 .is-active {
-                    background-color: #1890ff;
                     // 关闭三级菜单二级菜单样式
                     ul {
                         border: none;
@@ -630,7 +622,6 @@ li {
                 }
                 // 关闭三级菜单二级菜单样式
                 .is-active.is-opened {
-                    background-color: #191a23;
                     ul {
                         border: none;
                     }
@@ -644,9 +635,6 @@ li {
         .el-menu-item:hover i,
         .el-menu-item:hover span {
             color: #fff;
-        }
-        .el-sub-menu__title:hover {
-            background-color: $bg-aside;
         }
         .el-sub-menu__title:hover i,
         .el-sub-menu__title:hover span {
@@ -859,7 +847,6 @@ li {
     }
 }
 
-// edit_container
 .edit_container {
     background-color: $white-bg;
     padding: 15px;
@@ -870,95 +857,12 @@ li {
 
 .edit {
     background-color: $white-bg;
-    padding: 15px;
     .el-button {
         margin: 15px 0;
     }
 }
 
-// .el-menu .el-menu--inline {
-//     background: #2c3b41;
-// }
-// .el-sub-menu .el-sub-menu {
-//     background-color: #000408 !important;
-// }
-// .aside .el-scrollbar .el-scrollbar__view .el-sub-menu__title:hover {
-//     background-color: $bg-aside !important;
-// }
-// .el-menu--vertical {
-//     .el-menu {
-//         margin-left: -8px;
-//         background-color: rgb(48, 65, 86);
-//         .el-menu-item {
-//             background-color: rgb(48, 65, 86);
-//         }
-//         .el-menu-item:focus,
-//         .el-menu-item:hover {
-//             background-color: #263445;
-//             color: #fff;
-//         }
-//     }
-// }
-// 导航*****
-// add 5.13
 .el-container {
-    // .admin-box {
-    //     padding: 15px;
-    //     margin: 115px 15px 20px;
-    //     border-radius: 2px;
-    //     .button-box {
-    //         border: none;
-    //         padding: 0 0 10px 0px;
-    //     }
-    //     .el-table--border {
-    //         border-radius: 4px;
-    //         margin-bottom: 15px;
-    //     }
-    //     .el-table {
-    //         thead {
-    //             color: $color-table-thead;
-    //         }
-    //         th {
-    //             padding: 5px 0;
-    //             .cell {
-    //                 min-height: 34px;
-    //                 line-height: 34px;
-    //             }
-    //         }
-    //         td {
-    //             padding: 8px 0;
-    //         }
-    //         td,
-    //         th.is-leaf {
-    //             border-bottom: 1px solid #e8e8e8;
-    //         }
-    //     }
-    //     .el-pagination {
-    //         padding: 20px 0 0 0;
-    //     }
-    //     .upload-demo,
-    //     .upload {
-    //         padding: 0;
-    //     }
-    //     .system {
-    //         padding: 0;
-    //     }
-    //     .el-form.el-form--inline {
-    //         .el-form-item:last-child {
-    //             margin-bottom: 0;
-    //         }
-    //     }
-    //     .edit_container,
-    //     .edit {
-    //         padding: 0;
-    //     }
-    // }
-    // .admin-box:after,
-    // .admin-box:before {
-    //     content: "";
-    //     display: block;
-    //     clear: both;
-    // }
     .tips {
         margin-top: 10px;
         font-size: 14px;
@@ -968,11 +872,6 @@ li {
 }
 
 .el-container.layout-cont {
-    // .header-cont,
-    // .breadcrumb {
-    //     height: 40px !important;
-    //     line-height: 40px !important;
-    // }
     .main-cont.el-main {
         background-color: $bg-main;
         .menu-total {
@@ -981,7 +880,6 @@ li {
             color: #000000;
             margin-top: 16px;
         }
-        // background-color: #f0f2f5;
     }
 }
 
@@ -1105,6 +1003,7 @@ $mainHight: 100vh;
 
 .layout-cont {
     .right-box {
+        padding-top: 16px;
         display: flex;
         justify-content: flex-end;
         align-items: center;
@@ -1240,6 +1139,7 @@ $mainHight: 100vh;
     width: 120px;
     margin-right: 32px;
     text-align: center;
+    margin-top: -12px;
 }
 
 .screenfull {
@@ -1249,7 +1149,6 @@ $mainHight: 100vh;
 
 .el-dropdown {
     overflow: hidden;
-    height: 60px;
 }
 
 // dashboard

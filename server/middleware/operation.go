@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -25,14 +26,14 @@ func OperationRecord() gin.HandlerFunc {
 			var err error
 			body, err = ioutil.ReadAll(c.Request.Body)
 			if err != nil {
-				global.GVA_LOG.Error("read body from request error:", zap.Any("err", err))
+				global.GVA_LOG.Error("read body from request error:", zap.Error(err))
 			} else {
 				c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 			}
 		}
-		if claims, ok := c.Get("claims"); ok {
-			waitUse := claims.(*request.CustomClaims)
-			userId = int(waitUse.ID)
+		claims, _ := utils.GetClaims(c)
+		if claims.ID != 0 {
+			userId = int(claims.ID)
 		} else {
 			id, err := strconv.Atoi(c.Request.Header.Get("x-user-id"))
 			if err != nil {
@@ -69,7 +70,7 @@ func OperationRecord() gin.HandlerFunc {
 		record.Resp = writer.body.String()
 
 		if err := operationRecordService.CreateSysOperationRecord(record); err != nil {
-			global.GVA_LOG.Error("create operation record error:", zap.Any("err", err))
+			global.GVA_LOG.Error("create operation record error:", zap.Error(err))
 		}
 	}
 }
