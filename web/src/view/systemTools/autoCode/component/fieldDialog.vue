@@ -5,17 +5,20 @@
       ref="fieldDialogFrom"
       :model="middleDate"
       label-width="120px"
-      label-position="left"
+      label-position="right"
       :rules="rules"
+      class="grid-form"
     >
-      <el-form-item label="Field名称" prop="fieldName">
+      <el-form-item label="字段名称" prop="fieldName">
         <el-input v-model="middleDate.fieldName" autocomplete="off" style="width:80%" />
-        <el-button size="mini" style="width:18%;margin-left:2%" @click="autoFill">自动填充</el-button>
+        <el-button style="width:18%;margin-left:2%" @click="autoFill">
+          <span style="font-size: 12px">自动填充</span>
+        </el-button>
       </el-form-item>
-      <el-form-item label="Field中文名" prop="fieldDesc">
+      <el-form-item label="字段中文名" prop="fieldDesc">
         <el-input v-model="middleDate.fieldDesc" autocomplete="off" />
       </el-form-item>
-      <el-form-item label="FieldJSON" prop="fieldJson">
+      <el-form-item label="字段JSON" prop="fieldJson">
         <el-input v-model="middleDate.fieldJson" autocomplete="off" />
       </el-form-item>
       <el-form-item label="数据库字段名" prop="columnName">
@@ -24,47 +27,31 @@
       <el-form-item label="数据库字段描述" prop="comment">
         <el-input v-model="middleDate.comment" autocomplete="off" />
       </el-form-item>
-      <el-form-item label="Field数据类型" prop="fieldType">
+      <el-form-item label="字段类型" prop="fieldType">
         <el-select
           v-model="middleDate.fieldType"
           style="width:100%"
-          placeholder="请选择field数据类型"
+          placeholder="请选择字段类型"
           clearable
-          @change="getDbfdOptions"
+          @change="clearOther"
         >
           <el-option
             v-for="item in typeOptions"
             :key="item.value"
             :label="item.label"
             :value="item.value"
+            :disabled="item.disabled"
           />
         </el-select>
       </el-form-item>
-
-      <el-form-item label="数据库字段类型" prop="dataType">
-        <el-select
-          v-model="middleDate.dataType"
-          style="width:100%"
-          :disabled="!middleDate.fieldType"
-          placeholder="请选择数据库字段类型"
-          clearable
-        >
-          <el-option
-            v-for="item in dbfdOptions"
-            :key="item.label"
-            :label="item.label"
-            :value="item.label"
-          />
-        </el-select>
+      <el-form-item :label="middleDate.fieldType === 'enum' ? '枚举值' : '类型长度'" prop="dataTypeLong">
+        <el-input v-model="middleDate.dataTypeLong" :placeholder="middleDate.fieldType === 'enum'?`例:'北京','天津'`:'数据库类型长度'" />
       </el-form-item>
-      <el-form-item label="数据库字段长度" prop="dataTypeLong">
-        <el-input v-model="middleDate.dataTypeLong" placeholder="自定义类型必须指定长度" :disabled="!middleDate.dataType" />
-      </el-form-item>
-      <el-form-item label="Field查询条件" prop="fieldSearchType">
+      <el-form-item label="字段查询条件" prop="fieldSearchType">
         <el-select
           v-model="middleDate.fieldSearchType"
           style="width:100%"
-          placeholder="请选择Field查询条件"
+          placeholder="请选择字段查询条件"
           clearable
         >
           <el-option
@@ -72,10 +59,10 @@
             :key="item.value"
             :label="item.label"
             :value="item.value"
+            :disabled="canSelect(item.value)"
           />
         </el-select>
       </el-form-item>
-
       <el-form-item label="关联字典" prop="dictType">
         <el-select
           v-model="middleDate.dictType"
@@ -92,118 +79,117 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="是否排序">
+        <el-switch v-model="middleDate.sort" />
+      </el-form-item>
+      <el-form-item label="是否必填">
+        <el-switch v-model="middleDate.require" />
+      </el-form-item>
+      <el-form-item label="是否可清空">
+        <el-switch v-model="middleDate.clearable" />
+      </el-form-item>
+      <el-form-item label="校验失败文案">
+        <el-input v-model="middleDate.errorText" />
+      </el-form-item>
+
     </el-form>
   </div>
 </template>
 
-<script>
-import { getDict } from '@/utils/dictionary'
+<script setup>
 import { toLowerCase, toSQLLine } from '@/utils/stringFun'
 import { getSysDictionaryList } from '@/api/sysDictionary'
-import warningBar from '@/components/warningBar/warningBar.vue'
+import WarningBar from '@/components/warningBar/warningBar.vue'
+import { ref } from 'vue'
+
+const props = defineProps({
+  dialogMiddle: {
+    type: Object,
+    default: function() {
+      return {}
+    }
+  },
+  typeOptions: {
+    type: Array,
+    default: function() {
+      return []
+    }
+  },
+  typeSearchOptions: {
+    type: Array,
+    default: function() {
+      return []
+    }
+  },
+})
+
+const middleDate = ref({})
+const dictOptions = ref([])
+
+const rules = ref({
+  fieldName: [
+    { required: true, message: '请输入字段英文名', trigger: 'blur' }
+  ],
+  fieldDesc: [
+    { required: true, message: '请输入字段中文名', trigger: 'blur' }
+  ],
+  fieldJson: [
+    { required: true, message: '请输入字段格式化json', trigger: 'blur' }
+  ],
+  columnName: [
+    { required: true, message: '请输入数据库字段', trigger: 'blur' }
+  ],
+  fieldType: [
+    { required: true, message: '请选择字段类型', trigger: 'blur' }
+  ]
+})
+
+const init = async() => {
+  middleDate.value = props.dialogMiddle
+  const dictRes = await getSysDictionaryList({
+    page: 1,
+    pageSize: 999999
+  })
+
+  dictOptions.value = dictRes.data.list
+}
+init()
+
+const autoFill = () => {
+  middleDate.value.fieldJson = toLowerCase(middleDate.value.fieldName)
+  middleDate.value.columnName = toSQLLine(middleDate.value.fieldJson)
+}
+
+const canSelect = (item) => {
+  const fieldType = middleDate.value.fieldType
+  if (fieldType !== 'string' && item === 'LIKE') {
+    return true
+  }
+
+  if ((fieldType !== 'int' && fieldType !== 'time.Time' && fieldType !== 'float64') && (item === 'BETWEEN' || item === 'NOT BETWEEN')) {
+    return true
+  }
+  return false
+}
+
+const clearOther = () => {
+  middleDate.value.fieldSearchType = ''
+  middleDate.value.dictType = ''
+}
+
+const fieldDialogFrom = ref(null)
+defineExpose({ fieldDialogFrom })
+</script>
+
+<script>
 
 export default {
-  name: 'FieldDialog',
-  components: { warningBar },
-  props: {
-    dialogMiddle: {
-      type: Object,
-      default: function() {
-        return {}
-      }
-    }
-  },
-  data() {
-    return {
-      middleDate: {},
-      dbfdOptions: [],
-      dictOptions: [],
-      typeSearchOptions: [
-        {
-          label: '=',
-          value: '='
-        },
-        {
-          label: '<>',
-          value: '<>'
-        },
-        {
-          label: '>',
-          value: '>'
-        },
-        {
-          label: '<',
-          value: '<'
-        },
-        {
-          label: 'LIKE',
-          value: 'LIKE'
-        }
-      ],
-      typeOptions: [
-        {
-          label: '字符串',
-          value: 'string'
-        },
-        {
-          label: '整型',
-          value: 'int'
-        },
-        {
-          label: '布尔值',
-          value: 'bool'
-        },
-        {
-          label: '浮点型',
-          value: 'float64'
-        },
-        {
-          label: '时间',
-          value: 'time.Time'
-        }
-      ],
-      rules: {
-        fieldName: [
-          { required: true, message: '请输入field英文名', trigger: 'blur' }
-        ],
-        fieldDesc: [
-          { required: true, message: '请输入field中文名', trigger: 'blur' }
-        ],
-        fieldJson: [
-          { required: true, message: '请输入field格式化json', trigger: 'blur' }
-        ],
-        columnName: [
-          { required: true, message: '请输入数据库字段', trigger: 'blur' }
-        ],
-        fieldType: [
-          { required: true, message: '请选择field数据类型', trigger: 'blur' }
-        ]
-      }
-    }
-  },
-  async created() {
-    this.middleDate = this.dialogMiddle
-    const dictRes = await getSysDictionaryList({
-      page: 1,
-      pageSize: 999999
-    })
-
-    this.dictOptions = dictRes.data.list
-  },
-  methods: {
-    autoFill() {
-      this.middleDate.fieldJson = toLowerCase(this.middleDate.fieldName)
-      this.middleDate.columnName = toSQLLine(this.middleDate.fieldJson)
-    },
-    async getDbfdOptions() {
-      this.middleDate.dataType = ''
-      this.middleDate.dataTypeLong = ''
-      this.middleDate.fieldSearchType = ''
-      this.middleDate.dictType = ''
-      if (this.middleDate.fieldType) {
-        this.dbfdOptions = await getDict(this.middleDate.fieldType)
-      }
-    }
-  }
+  name: 'FieldDialog'
 }
 </script>
+<style scoped>
+.grid-form{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+</style>

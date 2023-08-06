@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <router-view />
+    <el-config-provider :locale="zhCn">
+      <router-view />
+    </el-config-provider>
   </div>
 </template>
 
@@ -10,11 +12,16 @@ export default {
 }
 </script>
 
+<script setup>
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+// element 2.3.8之前使用下面的语句
+// import zhCn from 'element-plus/lib/locale/lang/zh-cn'
+</script>
 <style lang="scss">
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 // 引入初始化样式
-@import '@/style/main.scss';
-@import '@/style/base.scss';
-@import '@/style/mobile.scss';
 #app {
   background: #eee;
   height: 100vh;

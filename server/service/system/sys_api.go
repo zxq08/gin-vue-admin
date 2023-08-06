@@ -2,7 +2,7 @@ package system
 
 import (
 	"errors"
-
+	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
@@ -16,8 +16,7 @@ import (
 //@param: api model.SysApi
 //@return: err error
 
-type ApiService struct {
-}
+type ApiService struct{}
 
 var ApiServiceApp = new(ApiService)
 
@@ -35,18 +34,29 @@ func (apiService *ApiService) CreateApi(api system.SysApi) (err error) {
 //@return: err error
 
 func (apiService *ApiService) DeleteApi(api system.SysApi) (err error) {
-	err = global.GVA_DB.Delete(&api).Error
-	CasbinServiceApp.ClearCasbin(1, api.Path, api.Method)
-	return err
+	var entity system.SysApi
+	err = global.GVA_DB.Where("id = ?", api.ID).First(&entity).Error // 根据id查询api记录
+	if errors.Is(err, gorm.ErrRecordNotFound) {                      // api记录不存在
+		return err
+	}
+	err = global.GVA_DB.Delete(&entity).Error
+	if err != nil {
+		return err
+	}
+	CasbinServiceApp.ClearCasbin(1, entity.Path, entity.Method)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetAPIInfoList
 //@description: 分页获取数据,
 //@param: api model.SysApi, info request.PageInfo, order string, desc bool
-//@return: err error
+//@return: list interface{}, total int64, err error
 
-func (apiService *ApiService) GetAPIInfoList(api system.SysApi, info request.PageInfo, order string, desc bool) (err error, list interface{}, total int64) {
+func (apiService *ApiService) GetAPIInfoList(api system.SysApi, info request.PageInfo, order string, desc bool) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	db := global.GVA_DB.Model(&system.SysApi{})
@@ -71,30 +81,44 @@ func (apiService *ApiService) GetAPIInfoList(api system.SysApi, info request.Pag
 	err = db.Count(&total).Error
 
 	if err != nil {
-		return err, apiList, total
+		return apiList, total, err
 	} else {
 		db = db.Limit(limit).Offset(offset)
 		if order != "" {
 			var OrderStr string
-			if desc {
-				OrderStr = order + " desc"
-			} else {
-				OrderStr = order
+			// 设置有效排序key 防止sql注入
+			// 感谢 Tom4t0 提交漏洞信息
+			orderMap := make(map[string]bool, 5)
+			orderMap["id"] = true
+			orderMap["path"] = true
+			orderMap["api_group"] = true
+			orderMap["description"] = true
+			orderMap["method"] = true
+			if orderMap[order] {
+				if desc {
+					OrderStr = order + " desc"
+				} else {
+					OrderStr = order
+				}
+			} else { // didn't match any order key in `orderMap`
+				err = fmt.Errorf("非法的排序字段: %v", order)
+				return apiList, total, err
 			}
+
 			err = db.Order(OrderStr).Find(&apiList).Error
 		} else {
 			err = db.Order("api_group").Find(&apiList).Error
 		}
 	}
-	return err, apiList, total
+	return apiList, total, err
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetAllApis
 //@description: 获取所有的api
-//@return: err error, apis []model.SysApi
+//@return:  apis []model.SysApi, err error
 
-func (apiService *ApiService) GetAllApis() (err error, apis []system.SysApi) {
+func (apiService *ApiService) GetAllApis() (apis []system.SysApi, err error) {
 	err = global.GVA_DB.Find(&apis).Error
 	return
 }
@@ -103,9 +127,9 @@ func (apiService *ApiService) GetAllApis() (err error, apis []system.SysApi) {
 //@function: GetApiById
 //@description: 根据id获取api
 //@param: id float64
-//@return: err error, api model.SysApi
+//@return: api model.SysApi, err error
 
-func (apiService *ApiService) GetApiById(id float64) (err error, api system.SysApi) {
+func (apiService *ApiService) GetApiById(id int) (api system.SysApi, err error) {
 	err = global.GVA_DB.Where("id = ?", id).First(&api).Error
 	return
 }
@@ -144,10 +168,29 @@ func (apiService *ApiService) UpdateApi(api system.SysApi) (err error) {
 //@return: err error
 
 func (apiService *ApiService) DeleteApisByIds(ids request.IdsReq) (err error) {
-	err = global.GVA_DB.Delete(&[]system.SysApi{}, "id in ?", ids.Ids).Error
+	var apis []system.SysApi
+	err = global.GVA_DB.Find(&apis, "id in ?", ids.Ids).Delete(&apis).Error
+	if err != nil {
+		return err
+	} else {
+		for _, sysApi := range apis {
+			CasbinServiceApp.ClearCasbin(1, sysApi.Path, sysApi.Method)
+		}
+		if err != nil {
+			return err
+		}
+	}
 	return err
 }
 
-func (apiService *ApiService) DeleteApiByIds(ids []string) (err error) {
-	return global.GVA_DB.Delete(system.SysApi{}, ids).Error
+//@author: [piexlmax](https://github.com/piexlmax)
+//@function: DeleteApis
+//@description: 删除选中API
+//@param: apis []model.SysApi
+//@return: err error
+
+func (apiService *ApiService) FreshCasbin() (err error) {
+	e := CasbinServiceApp.Casbin()
+	err = e.LoadPolicy()
+	return err
 }

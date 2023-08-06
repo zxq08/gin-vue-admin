@@ -5,14 +5,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type InitRouter struct {
-}
+type InitRouter struct{}
 
 func (s *InitRouter) InitInitRouter(Router *gin.RouterGroup) {
 	initRouter := Router.Group("init")
-	var dbApi = v1.ApiGroupApp.SystemApiGroup.DBApi
+	dbApi := v1.ApiGroupApp.SystemApiGroup.DBApi
 	{
-		initRouter.POST("initdb", dbApi.InitDB)   // 创建Api
-		initRouter.POST("checkdb", dbApi.CheckDB) // 创建Api
+		initRouter.POST("initdb", dbApi.InitDB)   // 初始化数据库
+		initRouter.POST("checkdb", dbApi.CheckDB) // 检测是否需要初始化数据库
 	}
 }

@@ -1,6 +1,8 @@
 <template>
   <div
     class="warning-bar"
+    :class="href&&'can-click'"
+    @click="open"
   >
     <el-icon>
       <warning-filled />
@@ -10,18 +12,22 @@
     </span>
   </div>
 </template>
-<script>
-import { WarningFilled } from '@element-plus/icons'
-
-export default {
-  components: {
-    [WarningFilled.name]: WarningFilled
+<script setup>
+import { WarningFilled } from '@element-plus/icons-vue'
+const prop = defineProps({
+  title: {
+    type: String,
+    default: ''
   },
-  props: {
-    title: {
-      type: String,
-      default: ''
-    },
+  href: {
+    type: String,
+    default: ''
+  }
+})
+
+const open = () => {
+  if (prop.href) {
+    window.open(prop.href)
   }
 }
 </script>
@@ -43,5 +49,8 @@ export default {
         color:#F67207;
         margin-left: 8px;
     }
+}
+.can-click{
+  cursor: pointer;
 }
 </style>

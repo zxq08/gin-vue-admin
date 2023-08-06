@@ -24,10 +24,11 @@ export const createTemp = (data) => {
 // @Produce application/json
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"创建成功"}"
 // @Router /autoCode/getDatabase [get]
-export const getDB = () => {
+export const getDB = (params) => {
   return service({
     url: '/autoCode/getDB',
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 
@@ -90,5 +91,52 @@ export const delSysHistory = (data) => {
     url: '/autoCode/delSysHistory',
     method: 'post',
     data
+  })
+}
+
+export const createPackageApi = (data) => {
+  return service({
+    url: '/autoCode/createPackage',
+    method: 'post',
+    data
+  })
+}
+
+export const getPackageApi = () => {
+  return service({
+    url: '/autoCode/getPackage',
+    method: 'post'
+  })
+}
+
+export const deletePackageApi = (data) => {
+  return service({
+    url: '/autoCode/delPackage',
+    method: 'post',
+    data
+  })
+}
+
+export const createPlugApi = (data) => {
+  return service({
+    url: '/autoCode/createPlug',
+    method: 'post',
+    data
+  })
+}
+
+export const installPlug = (data) => {
+  return service({
+    url: '/autoCode/installPlug',
+    method: 'post',
+    data
+  })
+}
+
+export const pubPlug = (params) => {
+  return service({
+    url: '/autoCode/pubPlug',
+    method: 'post',
+    params
   })
 }

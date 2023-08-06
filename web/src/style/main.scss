@@ -8,6 +8,7 @@
  */
 
 @import '@/style/basics.scss';
+@import '@/style/iconfont.css';
 html {
     line-height: 1.15;
     /* 1 */
@@ -419,12 +420,6 @@ template {
 HTML,
 body,
 div,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
 ul,
 ol,
 dl,
@@ -456,9 +451,6 @@ address,
 caption,
 cite,
 code,
-dfn,
-em,
-strong,
 th,
 var {
     font-style: normal;
@@ -467,22 +459,6 @@ var {
 
 a {
     text-decoration: none;
-}
-
-a:link {
-    color: #fff;
-}
-
-a:visited {
-    color: #fff;
-}
-
-a:hover {
-    color: #fff;
-}
-
-a:active {
-    color: #fff;
 }
 
 input::-ms-clear {
@@ -564,11 +540,10 @@ li {
         position: fixed;
         top: 0;
     }
-    .el-aside {
+    .gva-aside {
         -webkit-transition: width .2s;
         transition: width .2s;
         width: $width-aside;
-        background-color: $bg-aside;
         height: 100%;
         position: fixed;
         font-size: 0;
@@ -583,13 +558,14 @@ li {
         .tilte {
             min-height: $height-aside-tilte;
             line-height: $height-aside-tilte;
-            background: $bg-aside;
             text-align: center;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             .logoimg {
                 width: $width-aside-img;
                 height: $height-aside-img;
-                vertical-align: middle;
                 background: #fff;
                 border-radius: 50%;
                 padding: 3px;
@@ -599,30 +575,20 @@ li {
                 color: #fff;
                 font-weight: 600;
                 font-size: 20px;
-                vertical-align: middle;
                 padding-left: 10px;
             }
         }
     }
     .aside {
-        .el-menu-item {
-            >div {
-                padding: 0 15px !important;
+        .el-menu--collapse {
+            >.el-menu-item {
+                display: flex;
+                justify-content: center;
             }
         }
-        .el-menu-vertical {
-            background-color: $bg-aside;
-        }
         .el-sub-menu {
-            background-color: $bg-aside;
             .el-menu {
-                .el-menu-item {
-                    background-color: #000408;
-                    height: 44px;
-                    line-height: 44px;
-                }
                 .is-active {
-                    background-color: #1890ff;
                     // 关闭三级菜单二级菜单样式
                     ul {
                         border: none;
@@ -630,27 +596,11 @@ li {
                 }
                 // 关闭三级菜单二级菜单样式
                 .is-active.is-opened {
-                    background-color: #191a23;
                     ul {
                         border: none;
                     }
                 }
             }
-        }
-        .el-menu-item:focus,
-        .el-menu-item:hover {
-            background-color: transparent;
-        }
-        .el-menu-item:hover i,
-        .el-menu-item:hover span {
-            color: #fff;
-        }
-        .el-sub-menu__title:hover {
-            background-color: $bg-aside;
-        }
-        .el-sub-menu__title:hover i,
-        .el-sub-menu__title:hover span {
-            color: #fff;
         }
     }
     .hideside {
@@ -659,7 +609,7 @@ li {
         }
     }
     .mobile.hideside {
-        .el-aside {
+        .gva-aside {
             -webkit-transition-duration: .2s;
             transition-duration: .2s;
             -webkit-transform: translate3d(-210px, 0, 0);
@@ -667,7 +617,7 @@ li {
         }
     }
     .mobile {
-        .el-aside {
+        .gva-aside {
             -webkit-transition: -webkit-transform .28s;
             transition: -webkit-transform .28s;
             transition: transform .28s;
@@ -677,8 +627,6 @@ li {
     }
     .main-cont.el-main {
         min-height: 100%;
-        -webkit-transition: margin-left .28s;
-        transition: margin-left .28s;
         margin-left: $width-aside;
         position: relative;
     }
@@ -731,7 +679,6 @@ li {
         }
         th {
             padding: 6px 0;
-            background: #F7FBFF;
             .cell {
                 color: rgba($color: #000000, $alpha: 0.85);
                 font-size: 14px;
@@ -751,6 +698,7 @@ li {
             border-bottom: 1px solid #e8e8e8;
         }
         th.is-leaf {
+            background: #F7FBFF;
             border-bottom: none;
         }
     }
@@ -859,7 +807,6 @@ li {
     }
 }
 
-// edit_container
 .edit_container {
     background-color: $white-bg;
     padding: 15px;
@@ -870,95 +817,12 @@ li {
 
 .edit {
     background-color: $white-bg;
-    padding: 15px;
     .el-button {
         margin: 15px 0;
     }
 }
 
-// .el-menu .el-menu--inline {
-//     background: #2c3b41;
-// }
-// .el-sub-menu .el-sub-menu {
-//     background-color: #000408 !important;
-// }
-// .aside .el-scrollbar .el-scrollbar__view .el-sub-menu__title:hover {
-//     background-color: $bg-aside !important;
-// }
-// .el-menu--vertical {
-//     .el-menu {
-//         margin-left: -8px;
-//         background-color: rgb(48, 65, 86);
-//         .el-menu-item {
-//             background-color: rgb(48, 65, 86);
-//         }
-//         .el-menu-item:focus,
-//         .el-menu-item:hover {
-//             background-color: #263445;
-//             color: #fff;
-//         }
-//     }
-// }
-// 导航*****
-// add 5.13
 .el-container {
-    // .admin-box {
-    //     padding: 15px;
-    //     margin: 115px 15px 20px;
-    //     border-radius: 2px;
-    //     .button-box {
-    //         border: none;
-    //         padding: 0 0 10px 0px;
-    //     }
-    //     .el-table--border {
-    //         border-radius: 4px;
-    //         margin-bottom: 15px;
-    //     }
-    //     .el-table {
-    //         thead {
-    //             color: $color-table-thead;
-    //         }
-    //         th {
-    //             padding: 5px 0;
-    //             .cell {
-    //                 min-height: 34px;
-    //                 line-height: 34px;
-    //             }
-    //         }
-    //         td {
-    //             padding: 8px 0;
-    //         }
-    //         td,
-    //         th.is-leaf {
-    //             border-bottom: 1px solid #e8e8e8;
-    //         }
-    //     }
-    //     .el-pagination {
-    //         padding: 20px 0 0 0;
-    //     }
-    //     .upload-demo,
-    //     .upload {
-    //         padding: 0;
-    //     }
-    //     .system {
-    //         padding: 0;
-    //     }
-    //     .el-form.el-form--inline {
-    //         .el-form-item:last-child {
-    //             margin-bottom: 0;
-    //         }
-    //     }
-    //     .edit_container,
-    //     .edit {
-    //         padding: 0;
-    //     }
-    // }
-    // .admin-box:after,
-    // .admin-box:before {
-    //     content: "";
-    //     display: block;
-    //     clear: both;
-    // }
     .tips {
         margin-top: 10px;
         font-size: 14px;
@@ -968,11 +832,6 @@ li {
 }
 
 .el-container.layout-cont {
-    // .header-cont,
-    // .breadcrumb {
-    //     height: 40px !important;
-    //     line-height: 40px !important;
-    // }
     .main-cont.el-main {
         background-color: $bg-main;
         .menu-total {
@@ -981,7 +840,6 @@ li {
             color: #000000;
             margin-top: 16px;
         }
-        // background-color: #f0f2f5;
     }
 }
 
@@ -1069,21 +927,6 @@ li {
     }
 }
 
-.el-input-number__decrease,
-.el-input-number__increase {
-    position: absolute;
-    z-index: 1;
-    top: 3px !important;
-    width: 42px;
-    height: 29px;
-    line-height: 29px;
-    text-align: center;
-    background: #F5F7FA;
-    color: #606266;
-    cursor: pointer;
-    font-size: 12px;
-}
-
 $headerHigh: 52px;
 $mainHight: 100vh;
 .dropdown-group {
@@ -1105,6 +948,7 @@ $mainHight: 100vh;
 
 .layout-cont {
     .right-box {
+        padding-top: 16px;
         display: flex;
         justify-content: flex-end;
         align-items: center;
@@ -1235,13 +1079,6 @@ $mainHight: 100vh;
     }
 }
 
-.transition-box {
-    overflow: hidden;
-    width: 120px;
-    margin-right: 32px;
-    text-align: center;
-}
-
 .screenfull {
     overflow: hidden;
     color: rgba($color: #000000, $alpha: 0.65);
@@ -1249,7 +1086,6 @@ $mainHight: 100vh;
 
 .el-dropdown {
     overflow: hidden;
-    height: 60px;
 }
 
 // dashboard

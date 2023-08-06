@@ -1,5 +1,4 @@
 import service from '@/utils/request'
-
 // @Summary 设置角色资源权限
 // @Security ApiKeyAuth
 // @accept application/json
@@ -13,6 +12,16 @@ export const findFile = (params) => {
     url: '/fileUploadAndDownload/findFile',
     method: 'get',
     params
+  })
+}
+
+export const breakpointContinue = (data) => {
+  return service({
+    url: '/fileUploadAndDownload/breakpointContinue',
+    method: 'post',
+    donNotShowLoading: true,
+    headers: { 'Content-Type': 'multipart/form-data' },
+    data
   })
 }
 

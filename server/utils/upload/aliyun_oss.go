@@ -27,7 +27,7 @@ func (*AliyunOSS) UploadFile(file *multipart.FileHeader) (string, string, error)
 	}
 	defer f.Close() // 创建文件 defer 关闭
 	// 上传阿里云路径 文件名格式 自己可以改 建议保证唯一性
-	//yunFileTmpPath := filepath.Join("uploads", time.Now().Format("2006-01-02")) + "/" + file.Filename
+	// yunFileTmpPath := filepath.Join("uploads", time.Now().Format("2006-01-02")) + "/" + file.Filename
 	yunFileTmpPath := global.GVA_CONFIG.AliyunOSS.BasePath + "/" + "uploads" + "/" + time.Now().Format("2006-01-02") + "/" + file.Filename
 
 	// 上传文件流。
@@ -51,8 +51,8 @@ func (*AliyunOSS) DeleteFile(key string) error {
 	// 如需删除文件夹，请将objectName设置为对应的文件夹名称。如果文件夹非空，则需要将文件夹下的所有object删除后才能删除该文件夹。
 	err = bucket.DeleteObject(key)
 	if err != nil {
-		global.GVA_LOG.Error("function bucketManager.Delete() Filed", zap.Any("err", err.Error()))
-		return errors.New("function bucketManager.Delete() Filed, err:" + err.Error())
+		global.GVA_LOG.Error("function bucketManager.Delete() failed", zap.Any("err", err.Error()))
+		return errors.New("function bucketManager.Delete() failed, err:" + err.Error())
 	}
 
 	return nil

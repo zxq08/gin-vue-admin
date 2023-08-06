@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-button type="primary" class="drawer-container" icon="el-icon-setting" @click="showSettingDrawer" />
+    <el-button type="primary" class="drawer-container" icon="setting" @click="showSettingDrawer" />
     <el-drawer
       v-model="drawer"
       title="系统配置"
@@ -13,7 +13,9 @@
             <div class="theme-box">
               <div class="item" @click="changeMode('light')">
                 <div class="item-top">
-                  <i v-if="mode === 'light'" class="el-icon-check check" />
+                  <el-icon v-if="userStore.mode === 'light'" class="check">
+                    <check />
+                  </el-icon>
                   <img src="https://gw.alipayobjects.com/zos/antfincdn/NQ%24zoisaD2/jpRkZQMyYRryryPNtyIC.svg">
                 </div>
                 <p>
@@ -22,7 +24,9 @@
               </div>
               <div class="item" @click="changeMode('dark')">
                 <div class="item-top">
-                  <i v-if="mode === 'dark'" class="el-icon-check check" />
+                  <el-icon v-if="userStore.mode === 'dark'" class="check">
+                    <check />
+                  </el-icon>
                   <img src="https://gw.alipayobjects.com/zos/antfincdn/XwFOFbLkSM/LCkqqYNmvBEbokSDscrm.svg">
                 </div>
                 <p>
@@ -39,33 +43,33 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 export default {
-  data() {
-    return {
-      drawer: false,
-      direction: 'rtl'
-    }
-  },
-  computed: {
-    ...mapGetters('user', ['mode'])
-  },
-  methods: {
-    handleClose() {
-      this.drawer = false
-    },
-    showSettingDrawer() {
-      this.drawer = true
-    },
-    changeMode(e) {
-      if (e === null) {
-        this.$store.dispatch('user/changeSideMode', 'dark')
-        return
-      }
-      this.$store.dispatch('user/changeSideMode', e)
-    },
-  }
+  name: 'Setting',
 }
+</script>
+
+<script setup>
+import { ref } from 'vue'
+import { useUserStore } from '@/pinia/modules/user'
+const drawer = ref(false)
+const direction = ref('rtl')
+
+const userStore = useUserStore()
+
+const handleClose = () => {
+  drawer.value = false
+}
+const showSettingDrawer = () => {
+  drawer.value = true
+}
+const changeMode = (e) => {
+  if (e === null) {
+    userStore.changeSideMode('dark')
+    return
+  }
+  userStore.changeSideMode(e)
+}
+
 </script>
 
 <style lang="scss" scoped>
